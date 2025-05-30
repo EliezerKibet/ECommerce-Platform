@@ -37,14 +37,6 @@ A modern, full-stack e-commerce solution specializing in premium chocolate produ
   - Cart abandonment recovery
   - Wishlist management
 
-### 💳 Payment & Checkout
-- **Secure Payment Processing**
-  - Stripe integration for card payments
-  - Multiple payment methods (Credit/Debit, PayPal, Apple Pay)
-  - PCI DSS compliant
-  - Tax calculation
-  - Shipping cost estimation
-  - Promo code support
 
 ### 📦 Order Management
 - **Complete Order Lifecycle**
@@ -107,41 +99,7 @@ Cloudinary       - Image optimization
 - SQL Server
 - Redis (optional, for caching)
 
-### Backend Setup
-```bash
-# Clone the repository
-git clone https://github.com/yourusername/chocolate-ecommerce.git
-cd chocolate-ecommerce
 
-# Navigate to backend
-cd backend
-
-# Restore packages
-dotnet restore
-
-# Update database connection string in appsettings.json
-# Run migrations
-dotnet ef database update
-
-# Start the API
-dotnet run
-```
-
-### Frontend Setup
-```bash
-# Navigate to frontend
-cd frontend
-
-# Install dependencies
-npm install
-
-# Create environment file
-cp .env.example .env.local
-# Update environment variables
-
-# Start development server
-npm run dev
-```
 
 ## 📱 Screenshots
 
@@ -261,8 +219,6 @@ docker-compose up --build
 - ✅ User Authentication System
 - ✅ Product Catalog Management
 - ✅ Shopping Cart Functionality
-- 🚧 Payment Integration (Stripe)
-- 🚧 Order Management System
 - 📅 Admin Dashboard (Planned)
 - 📅 Mobile App (Future)
 
