@@ -1,4 +1,4 @@
-# 🍫 Chocolate Ecommerce Platform
+# Chocolate Ecommerce Platform
 
 A modern, full-stack e-commerce solution specializing in premium chocolate products with comprehensive product management, shopping cart functionality, and secure payment integration.
 
