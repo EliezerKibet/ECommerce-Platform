@@ -104,11 +104,11 @@ Cloudinary       - Image optimization
 ## 📱 Screenshots
 
 ### Homepage
-![Homepage](screenshots/homepage.png)
+![Homepage](screenshots/home.png)
 *Modern, responsive homepage with featured products and categories*
 
 ### Product Catalog
-![Product Catalog](screenshots/catalog.png)
+![Product Catalog](screenshots/products.png)
 *Advanced filtering and search functionality*
 
 ### Shopping Cart
@@ -120,7 +120,7 @@ Cloudinary       - Image optimization
 *Secure, multi-step checkout with Stripe integration*
 
 ### Admin Dashboard
-![Admin Dashboard](screenshots/admin.png)
+![Admin Dashboard](screenshots/admin_dashboard.png)
 *Comprehensive admin panel for managing the entire platform*
 
 ## 🏛️ Architecture
