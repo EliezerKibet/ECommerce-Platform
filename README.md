@@ -8,8 +8,6 @@ A modern, full-stack e-commerce solution specializing in premium chocolate produ
 ![Database](https://img.shields.io/badge/Database-SQL%20Server-red)
 ![Payment](https://img.shields.io/badge/Payment-Stripe-blue)
 
-Video Demo: https://youtu.be/91_lUz7Gw2E
-
 ## ✨ Features
 
 ### 🔐 User Management
@@ -139,28 +137,28 @@ Cloudinary       - Image optimization
 ## 📱 Screenshots & Demo
 
 ### 🏠 Homepage
-![Homepage](screenshots/home.png)
+![Homepage](./screenshots/home.jpg)
 *Modern, responsive homepage featuring premium chocolate collections with elegant hero sections, featured products carousel, and intuitive navigation*
 
 ### 🍫 Product Catalog
-![Product Catalog](screenshots/products.png)
+![Product Catalog](./screenshots/products.jpg)
 *Advanced product browsing with category filters, search functionality, grid/list views, and detailed product cards showing ratings and pricing*
 
 ### 🛒 Shopping Cart
-![Shopping Cart](screenshots/cart.png)
+![Shopping Cart](./screenshots/cart.jpg)
 *Streamlined cart experience with quantity controls, real-time price updates, saved items, and smooth checkout flow*
 
 ### 💳 Checkout Process
-![Checkout](screenshots/checkout.png)
+![Checkout](./screenshots/checkout.jpg)
 *Secure multi-step checkout with shipping information, payment options, order review, and Stripe payment integration*
 
 ### 📊 Admin Dashboard
-![Admin Dashboard](screenshots/admin_dashboard.png)
+![Admin Dashboard](./screenshots/admin%20dashboard.jpg)
 *Comprehensive admin control panel with sales analytics, inventory management, order processing, and customer insights*
 
-### 📱 Mobile Experience
-![Mobile View](screenshots/mobile.png)
-*Fully responsive design optimized for mobile shopping with touch-friendly navigation and seamless user experience*
+### 📦 Orders & Reviews
+![Orders and Reviews](./screenshots/orders%20and%20review.jpg)
+*Complete order management system with tracking, status updates, and customer review functionality*
 
 ## 🎬 Live Demo
 
@@ -342,7 +340,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 **Project Developer:** Eliezer Kibet
 - 📧 Email: elieserkibet@gmail.com
 - 💼 LinkedIn: [Eliezer Kibet](https://linkedin.com/in/eliezer-kibet-80217a301/)
-- 🌐 Portfolio: [Your Portfolio Website]
 
 ## 🙏 Acknowledgments
 
