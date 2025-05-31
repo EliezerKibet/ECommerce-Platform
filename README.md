@@ -8,6 +8,10 @@ A modern, full-stack e-commerce solution specializing in premium chocolate produ
 ![Database](https://img.shields.io/badge/Database-SQL%20Server-red)
 ![Payment](https://img.shields.io/badge/Payment-Stripe-blue)
 
+## 🎬 Live Demo
+
+**📺 [Watch Full Demo Video](https://youtu.be/91_lUz7Gw2E)** - Complete walkthrough of all features including admin dashboard !
+
 ## ✨ Features
 
 ### 🔐 User Management
