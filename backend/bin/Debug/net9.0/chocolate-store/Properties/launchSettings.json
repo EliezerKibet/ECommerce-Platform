@@ -1,0 +1,15 @@
+{
+    "profiles": {
+        "Next.js Development": {
+            "commandName": "Executable",
+            "executablePath": "cmd.exe",
+            "commandLineArgs": "/c npm run dev",
+            "workingDirectory": "$(ProjectDir)",
+            "launchBrowser": true,
+            "launchUrl": "http://localhost:3000",
+            "environmentVariables": {
+                "ASPNETCORE_ENVIRONMENT": "Development"
+            }
+        }
+    }
+}
