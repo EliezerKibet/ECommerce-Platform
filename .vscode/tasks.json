@@ -1,0 +1,27 @@
+﻿{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "${workspaceFolder}/ECommerce.API.csproj",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "start-frontend",
+            "type": "shell",
+            "command": "start \"Next.js Frontend\" cmd /c \"cd ${workspaceFolder}\\chocolate-store && npm run dev\"",
+            "dependsOn": [ "build" ],
+            "presentation": {
+                "reveal": "silent"
+            },
+            "problemMatcher": []
+        }
+    ]
+}

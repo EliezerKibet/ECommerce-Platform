@@ -1,0 +1,66 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include=".vscode\launch.json" />
+    <Content Include=".vscode\tasks.json" />
+    <Content Include="chocolate-store\public\uploads\52781af2-c6c4-4559-a857-fa491bf29fbd.jpg">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Include="chocolate-store\public\uploads\background.jpg" />
+    <Content Include="chocolate-store\public\uploads\bounty.jpg">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Include="chocolate-store\public\uploads\dark_espresso_collections.jpg" />
+    <Content Include="chocolate-store\public\uploads\milk_classic_collections.jpg" />
+    <Content Include="chocolate-store\public\uploads\truffle_collection_collections.jpg" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="14.0.0" />
+    <PackageReference Include="FluentAssertions" Version="8.2.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.4" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.4" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.4" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.4">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.4" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="9.0.4" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.4" />
+    <PackageReference Include="SendGrid" Version="9.29.3" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="8.1.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="chocolate-store\src\app\api\Auth\login\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="wwwroot\uploads\backgroundamin.jpg" />
+    <None Include="wwwroot\uploads\cacao_nibs.jpg" />
+    <None Include="wwwroot\uploads\caramel_swirl.jpg" />
+    <None Include="wwwroot\uploads\celebration_box.jpg" />
+    <None Include="wwwroot\uploads\chocolate_hamper.jpg" />
+    <None Include="wwwroot\uploads\coconut_white.jpg" />
+    <None Include="wwwroot\uploads\dark_espresso.jpg" />
+    <None Include="wwwroot\uploads\hazelnut_crunch.jpg" />
+    <None Include="wwwroot\uploads\madagascar.jpg" />
+    <None Include="wwwroot\uploads\milk_classic.jpg" />
+    <None Include="wwwroot\uploads\organic_dark.jpg" />
+    <None Include="wwwroot\uploads\organic_milk_almond.jpg" />
+    <None Include="wwwroot\uploads\raspberry_white.jpg" />
+    <None Include="wwwroot\uploads\sea_salt_dark.jpg" />
+    <None Include="wwwroot\uploads\truffle_collection.jpg" />
+    <None Include="wwwroot\uploads\vanilla_white.jpg" />
+  </ItemGroup>
+
+</Project>

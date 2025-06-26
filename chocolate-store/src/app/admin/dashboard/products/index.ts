@@ -1,0 +1,2 @@
+
+export { ProductDetailsModal } from './ProductDetailsModal';

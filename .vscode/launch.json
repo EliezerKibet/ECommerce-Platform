@@ -1,0 +1,26 @@
+﻿{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Full Stack Application",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "start-frontend",
+            "program": "${workspaceFolder}/bin/Debug/net7.0/ECommerce.API.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}",
+            "stopAtEntry": false,
+            "serverReadyAction": {
+                "action": "openExternally",
+                "pattern": "\\bNow listening on:\\s+(https?://\\S+)",
+                "uriFormat": "http://localhost:3000"
+            },
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development",
+                "ASPNETCORE_URLS": "http://localhost:5202"
+            },
+            "launchSettingsFilePath": "${workspaceFolder}/Properties/launchSettings.json",
+            "launchSettingsProfile": "http"
+        }
+    ]
+}
