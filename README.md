@@ -55,10 +55,10 @@ ECommerce-Platform/
 ![Checkout](screenshots/checkout.jpg)
 
 ### Admin Dashboard
-![Admin Dashboard](screenshots/admin=-dashboard.jpg)
+![Admin Dashboard](screenshots/admin-dashboard.jpg)
 
 ### Orders & Reviews
-![Orders](screenshots/orders and review.jpg)
+![Orders](screenshots/orders-and-review.jpg)
 
 ## 🧪 Testing
 
