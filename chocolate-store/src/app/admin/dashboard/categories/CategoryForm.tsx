@@ -1,4 +1,3 @@
-// CategoryForm.tsx - Minimalist form with just name and description
 'use client'
 
 import React, { useState, useEffect } from 'react'
@@ -8,7 +7,7 @@ import { CategoryDto } from '../types'
 interface CategoryFormProps {
     isOpen: boolean
     onClose: () => void
-    editingCategory: CategoryDto | null  // Changed from CategoryWithStatus
+    editingCategory: CategoryDto | null  
     onSubmit: (formData: FormData, isEdit: boolean, categoryId?: number) => Promise<void>
     loading: boolean
 }
@@ -28,7 +27,6 @@ export const CategoryForm: React.FC<CategoryFormProps> = ({
 
     const isEdit = editingCategory !== null
 
-    // Reset form when modal opens/closes or editing category changes
     useEffect(() => {
         if (isOpen) {
             if (editingCategory) {
@@ -46,7 +44,6 @@ export const CategoryForm: React.FC<CategoryFormProps> = ({
         }
     }, [isOpen, editingCategory])
 
-    // Handle input changes
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target
 
@@ -55,13 +52,11 @@ export const CategoryForm: React.FC<CategoryFormProps> = ({
             [name]: value
         }))
 
-        // Clear error when user starts typing
         if (errors[name]) {
             setErrors(prev => ({ ...prev, [name]: '' }))
         }
     }
 
-    // Validate form
     const validateForm = () => {
         const newErrors: Record<string, string> = {}
 
@@ -81,7 +76,6 @@ export const CategoryForm: React.FC<CategoryFormProps> = ({
         return Object.keys(newErrors).length === 0
     }
 
-    // Handle form submission
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
 
@@ -94,7 +88,6 @@ export const CategoryForm: React.FC<CategoryFormProps> = ({
             submitFormData.append('name', formData.name.trim())
             submitFormData.append('description', formData.description.trim())
 
-            // Log form data for debugging
             console.log('Submitting category form data:')
             for (const [key, value] of submitFormData.entries()) {
                 console.log(key, value)

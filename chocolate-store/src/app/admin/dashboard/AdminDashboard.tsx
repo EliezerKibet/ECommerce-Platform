@@ -1,11 +1,9 @@
-﻿// Enhanced Admin Dashboard Component with Section Refresh
-'use client'
+﻿'use client'
 
 import React, { useState, useEffect } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { TrendingUp, Users, ShoppingCart, DollarSign, BarChart3, Activity, Download, MessageSquare } from 'lucide-react'
 
-// Import your existing components
 import { ProductList, ProductForm } from './products'
 import { ProductDetailsModal } from '../dashboard/products/ProductDetailsModal'
 import { CategoryList, CategoryForm, CategoryDetailsModal } from './categories'
@@ -13,10 +11,8 @@ import { PromotionForm } from './promotions/PromotionForm'
 import { PromotionList } from './promotions/PromotionList'
 import { PromotionDetailsModal } from './promotions/PromotionDetailsModal'
 
-//coupons
 import { CouponForm, CouponList, CouponDetailsModal } from './coupons';
 
-// Import types
 import {
     ProductDto,
     CouponDto,
@@ -29,14 +25,11 @@ import {
     ExtendedError
 } from './types'
 
-// Import services
 import { adminService, adminAnalyticsService } from './services'
 import { categoryService } from './categoryService'
 
-// Import utilities
 import { formatCurrency, exportData } from './utils'
 
-// Import components
 import {
     LoadingSpinner,
     ErrorDisplay,
@@ -64,7 +57,6 @@ type PromotionPayload = {
 
 const AdminDashboard: React.FC = () => {
     
-    // Main data state
     const [products, setProducts] = useState<ProductDto[]>([])
     const [categories, setCategories] = useState<CategoryDto[]>([])
     const [promotions, setPromotions] = useState<PromotionDto[]>([])
@@ -72,14 +64,12 @@ const AdminDashboard: React.FC = () => {
     const [salesOrders, setSalesOrders] = useState<SalesOrderDto | null>(null)
     const [reviews, setReviews] = useState<AdminReviewDto[]>([])
 
-    // UI state
     const [loading, setLoading] = useState<boolean>(true)
     const [error, setError] = useState<string | null>(null)
     const [debugMode, setDebugMode] = useState<boolean>(false)
     const [selectedPeriod, setSelectedPeriod] = useState<string>('last30days')
     const [successMessage, setSuccessMessage] = useState<string | null>(null)
 
-    // Product form state
     const [showProductForm, setShowProductForm] = useState(false)
     const [editingProduct, setEditingProduct] = useState<ProductDto | null>(null)
     const [productFormLoading] = useState(false)
@@ -89,21 +79,18 @@ const AdminDashboard: React.FC = () => {
     const [productSortBy, setProductSortBy] = useState<'name' | 'price' | 'stock'>('name')
     const [productSortOrder, setProductSortOrder] = useState<'asc' | 'desc'>('asc')
 
-    // Category form state
     const [showCategoryForm, setShowCategoryForm] = useState(false)
     const [editingCategory, setEditingCategory] = useState<CategoryDto | null>(null)
     const [categoryFormLoading, setCategoryFormLoading] = useState(false)
     const [selectedCategory, setSelectedCategory] = useState<CategoryDto | null>(null)
     const [showCategoryDetails, setShowCategoryDetails] = useState(false)
 
-    // Promotion state (placeholder for now since promotions aren't fully implemented)
     const [showPromotionForm, setShowPromotionForm] = useState(false)
     const [editingPromotion, setEditingPromotion] = useState<PromotionDto | null>(null)
     const [selectedPromotion, setSelectedPromotion] = useState<PromotionDto | null>(null)
     const [showPromotionDetails, setShowPromotionDetails] = useState(false)
     const [viewingPromotion, setViewingPromotion] = useState<PromotionDto | null>(null)
 
-    //coupon const [showCouponForm, setShowCouponForm] = useState(false);
     const [coupons, setCoupons] = useState<CouponDto[]>([]);
     const [showCouponForm, setShowCouponForm] = useState(false);
     const [editingCoupon, setEditingCoupon] = useState<CouponDto | null>(null);
@@ -113,7 +100,6 @@ const AdminDashboard: React.FC = () => {
 
 
 
-    // Fix String.repeat issues on component mount
     useEffect(() => {
         const originalRepeat = String.prototype.repeat
         String.prototype.repeat = function (count) {
@@ -130,8 +116,6 @@ const AdminDashboard: React.FC = () => {
     }, [])
 
 
-    // Fixed fetchSalesData function in AdminDashboard.tsx
-    // Fixed fetchSalesData function in AdminDashboard.tsx - No 'any' types
     const fetchSalesData = async (period: string) => {
         try {
             console.log('Fetching sales data for period:', period);
@@ -145,14 +129,13 @@ const AdminDashboard: React.FC = () => {
                     averageOrderValue: allTimeData.allTimeSales.summary.averageOrderValue,
                     periodStart: allTimeData.allTimeSales.summary.firstOrderDate || '',
                     periodEnd: allTimeData.allTimeSales.summary.lastOrderDate || '',
-                    dailyData: [] // Always initialize as empty array for alltime
+                    dailyData: [] 
                 };
                 setSalesSummary(convertedSummary);
             } else {
                 const flexibleData = await adminAnalyticsService.getFlexibleSalesSummary(period);
 
                 if ('allTimeSales' in flexibleData) {
-                    // Handle AllTimeSalesDto format
                     const allTimeData = flexibleData as AllTimeSalesDto;
                     const convertedSummary: SalesSummaryDto = {
                         totalRevenue: allTimeData.allTimeSales.summary.totalRevenue,
@@ -161,21 +144,18 @@ const AdminDashboard: React.FC = () => {
                         averageOrderValue: allTimeData.allTimeSales.summary.averageOrderValue,
                         periodStart: allTimeData.allTimeSales.summary.firstOrderDate || '',
                         periodEnd: allTimeData.allTimeSales.summary.lastOrderDate || '',
-                        dailyData: [] // Always initialize as empty array
+                        dailyData: [] 
                     };
                     setSalesSummary(convertedSummary);
                 } else {
-                    // Handle SalesSummaryDto format
                     const summaryData = flexibleData as SalesSummaryDto;
 
-                    // Fix the dailyData issue - ensure it's always an array with proper typing
                     let dailyData: Array<{ date: string; revenue: number; orders: number }> = [];
 
                     if (summaryData.dailyData) {
                         if (Array.isArray(summaryData.dailyData)) {
                             dailyData = summaryData.dailyData;
                         } else if (summaryData.dailyData && typeof summaryData.dailyData === 'object') {
-                            // Check if it's in $values format with proper typing
                             const dailyDataObj = summaryData.dailyData as { $values?: Array<{ date: string; revenue: number; orders: number }> };
                             if (dailyDataObj && '$values' in dailyDataObj && Array.isArray(dailyDataObj.$values)) {
                                 dailyData = dailyDataObj.$values;
@@ -201,7 +181,6 @@ const AdminDashboard: React.FC = () => {
             console.error('Error fetching sales data:', err);
             setError(err instanceof Error ? err.message : 'Failed to fetch sales data');
 
-            // Set fallback empty state
             setSalesSummary({
                 totalRevenue: 0,
                 totalOrders: 0,
@@ -209,11 +188,10 @@ const AdminDashboard: React.FC = () => {
                 averageOrderValue: 0,
                 periodStart: '',
                 periodEnd: '',
-                dailyData: [] // Always ensure this is an array
+                dailyData: [] 
             });
         }
     };
-    // Fetch sales orders
     const fetchSalesOrders = async (page: number = 1) => {
         try {
             const ordersData = await adminAnalyticsService.getSalesOrders(page, 10);
@@ -235,7 +213,6 @@ const AdminDashboard: React.FC = () => {
     };
 
 
-    // Add this function to handle sorting
     const handleProductSort = (field: 'name' | 'price' | 'stock') => {
         if (productSortBy === field) {
             setProductSortOrder(productSortOrder === 'asc' ? 'desc' : 'asc');
@@ -244,8 +221,6 @@ const AdminDashboard: React.FC = () => {
             setProductSortOrder('asc');
         }
     };
-    // Fetch reviews
-    // Update the fetchReviews function to use the API endpoint
     const fetchReviews = async () => {
         try {
             setLoading(true);
@@ -277,7 +252,6 @@ const AdminDashboard: React.FC = () => {
         }
     };
 
-    // Update the handleApproveReview function to use the toggle endpoint
     const handleApproveReview = async (reviewId: number, currentStatus: boolean) => {
         try {
             // Optimistically update UI
@@ -310,7 +284,6 @@ const AdminDashboard: React.FC = () => {
         } catch (error) {
             console.error('Error updating review status:', error);
 
-            // Revert the optimistic update if there was an error
             setReviews(reviews.map(review =>
                 review.id === reviewId ?
                     {
@@ -326,23 +299,18 @@ const AdminDashboard: React.FC = () => {
         }
     };
 
-    // Update the handleDeleteReview function to use the correct endpoint
     const handleDeleteReview = async (reviewId: number) => {
-        // Find the review for the confirmation message
         const review = reviews.find(r => r.id === reviewId);
 
-        // Confirmation dialog
         const confirmed = window.confirm(
             `Are you sure you want to delete this review?${review?.title ? `\n\nReview: "${review.title}"` : ''}\n\nThis action cannot be undone.`
         );
 
         if (!confirmed) return;
 
-        // Keep the original reviews in case we need to restore them on error
         const originalReviews = [...reviews];
 
         try {
-            // Optimistically update UI
             setReviews(reviews.filter(review => review.id !== reviewId));
 
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5202'}/api/admin/analytics/sales/reviews/${reviewId}`, {
@@ -369,7 +337,6 @@ const AdminDashboard: React.FC = () => {
         }
     };
 
-    // Fetch data on component mount
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -380,20 +347,19 @@ const AdminDashboard: React.FC = () => {
                     productsData,
                     categoriesData,
                     promotionsData,
-                    couponsData  // ADD THIS LINE
+                    couponsData  
                 ] = await Promise.all([
                     adminService.getProducts().catch(() => []),
                     adminService.getCategories().catch(() => []),
                     adminService.getPromotions().catch(() => []),
-                    adminService.getCoupons().catch(() => [])  // ADD THIS LINE
+                    adminService.getCoupons().catch(() => []) 
                 ])
 
                 setProducts(productsData)
                 setCategories(categoriesData)
                 setPromotions(promotionsData);
-                setCoupons(couponsData);  // ADD THIS LINE
+                setCoupons(couponsData); 
 
-                // Fetch sales data for the default period
                 await fetchSalesData(selectedPeriod);
                 await fetchReviews();
                 await fetchSalesOrders(1);
@@ -409,13 +375,10 @@ const AdminDashboard: React.FC = () => {
         fetchData()
     }, [selectedPeriod])
 
-    // Add this at the top of your AdminDashboard component
     useEffect(() => {
-        // Create style element
         const styleElement = document.createElement('style');
         styleElement.setAttribute('id', 'admin-dashboard-style');
 
-        // Define styles with !important to override global CSS
         styleElement.textContent = `
     body {
       background-image: none !important;
@@ -456,10 +419,8 @@ const AdminDashboard: React.FC = () => {
     }
   `;
 
-        // Add to document head
         document.head.appendChild(styleElement);
 
-        // Clean up on component unmount
         return () => {
             const existingStyle = document.getElementById('admin-dashboard-style');
             if (existingStyle) {
@@ -468,7 +429,6 @@ const AdminDashboard: React.FC = () => {
         };
     }, []);
 
-    // Handle period change
     const handlePeriodChange = async (period: string) => {
         setSelectedPeriod(period);
         setLoading(true);
@@ -479,7 +439,6 @@ const AdminDashboard: React.FC = () => {
         }
     };
 
-    // Product management handlers
     const handleEditProduct = (product: ProductDto) => {
         setEditingProduct(product);
         setShowProductForm(true);
@@ -500,13 +459,10 @@ const AdminDashboard: React.FC = () => {
         }
     };
 
-    // Enhanced handleDeleteProduct in AdminDashboard.tsx
     const handleDeleteProduct = async (id: number) => {
-        // Find the product to get its name for the confirmation dialog
         const product = products.find(p => p.id === id);
         const productName = product ? product.name : `Product #${id}`;
 
-        // Enhanced confirmation dialog
         const confirmed = window.confirm(
             `Are you sure you want to delete "${productName}"?\n\n` +
             `This action cannot be undone. The product will be permanently removed from your inventory.`
@@ -514,29 +470,23 @@ const AdminDashboard: React.FC = () => {
 
         if (!confirmed) return;
 
-        // Show loading state
         const originalProducts = [...products];
 
         try {
-            // Optimistically remove from UI
             setProducts(products.filter(product => product.id !== id));
 
-            // Attempt to delete on server
             await adminService.deleteProduct(id);
 
-            // Show success message
             setSuccessMessage(`"${productName}" has been deleted successfully!`);
             setTimeout(() => setSuccessMessage(null), 3000);
 
             console.log(`Product ${id} deleted successfully`);
 
         } catch (error) {
-            // Restore the original products list on error
             setProducts(originalProducts);
 
             console.error('Error deleting product:', error);
 
-            // Enhanced error message
             let errorMessage = 'Failed to delete product';
 
             if (error instanceof Error) {
@@ -554,7 +504,6 @@ const AdminDashboard: React.FC = () => {
                     errorMessage = error.message || 'An unexpected error occurred';
                 }
 
-                // Log detailed error information
                 if (extendedError.details) {
                     console.error('Delete error details:', extendedError.details);
                 }
@@ -562,7 +511,6 @@ const AdminDashboard: React.FC = () => {
 
             setError(`${errorMessage} (${productName})`);
 
-            // Clear error after 5 seconds
             setTimeout(() => setError(null), 5000);
         }
     };
@@ -571,11 +519,6 @@ const AdminDashboard: React.FC = () => {
         setShowProductDetails(false);
         setSelectedProduct(null);
     };
-
-    // Fixed AdminDashboard.tsx handleProductSubmit with proper types
-    // Fixed handlePromotionSubmit function in AdminDashboard.tsx
-    // FINAL FIX: This works specifically with your PromotionService
-    // Replace your handlePromotionSubmit function with this
 
     const handlePromotionSubmit = async (
         data: PromotionPayload,
@@ -586,7 +529,6 @@ const AdminDashboard: React.FC = () => {
             setLoading(true);
             setError(null);
 
-            // Validate required fields
             if (!data.name || !data.startDate || !data.endDate) {
                 throw new Error('Name, start date, and end date are required');
             }
@@ -595,7 +537,6 @@ const AdminDashboard: React.FC = () => {
                 throw new Error('At least one product must be selected');
             }
 
-            // Validate date range
             const startDate = new Date(data.startDate);
             const endDate = new Date(data.endDate);
             if (startDate >= endDate) {
@@ -608,17 +549,14 @@ const AdminDashboard: React.FC = () => {
             console.log('Original promotion:', editingPromotion);
             console.log('Form data:', data);
 
-            // Your PromotionService doesn't validate past dates, so the issue is in DTO validation
-            // We need to format dates in a way that matches your server's expectations
 
             const finalPayload = {
                 name: data.name.trim(),
                 description: data.description.trim(),
                 discountPercentage: Number(data.discountPercentage),
-                // ✅ Key fix: Use the exact same date format as your server
                 startDate: isEdit && editingPromotion ?
-                    editingPromotion.startDate : // Use original server format for edits
-                    new Date(data.startDate).toISOString(), // Format for new promotions
+                    editingPromotion.startDate : 
+                    new Date(data.startDate).toISOString(), 
                 endDate: new Date(data.endDate).toISOString(),
                 isActive: Boolean(data.isActive),
                 colorScheme: data.colorScheme?.trim() || '',
@@ -712,9 +650,6 @@ const AdminDashboard: React.FC = () => {
             setLoading(false);
         }
     };
-    // Add these category management handlers after handleProductSubmit:
-
-    // Category management handlers
     const handleEditCategory = (category: CategoryDto) => {
         setEditingCategory(category);
         setShowCategoryForm(true);
@@ -759,11 +694,9 @@ const AdminDashboard: React.FC = () => {
     };
 
     const handleDeleteCategory = async (id: number) => {
-        // Find the category to get its name for the confirmation dialog
         const category = categories.find(c => c.id === id);
         const categoryName = category ? category.name : `Category #${id}`;
 
-        // Enhanced confirmation dialog
         const confirmed = window.confirm(
             `Are you sure you want to delete "${categoryName}"?\n\n` +
             `This action cannot be undone. The category will be permanently removed.`
@@ -771,29 +704,23 @@ const AdminDashboard: React.FC = () => {
 
         if (!confirmed) return;
 
-        // Show loading state
         const originalCategories = [...categories];
 
         try {
-            // Optimistically remove from UI
             setCategories(categories.filter(category => category.id !== id));
 
-            // Attempt to delete on server
             await categoryService.deleteCategory(id);
 
-            // Show success message
             setSuccessMessage(`"${categoryName}" has been deleted successfully!`);
             setTimeout(() => setSuccessMessage(null), 3000);
 
             console.log(`Category ${id} deleted successfully`);
 
         } catch (error) {
-            // Restore the original categories list on error
             setCategories(originalCategories);
 
             console.error('Error deleting category:', error);
 
-            // Enhanced error message
             let errorMessage = 'Failed to delete category';
 
             if (error instanceof Error) {
@@ -819,7 +746,6 @@ const AdminDashboard: React.FC = () => {
 
             setError(`${errorMessage} (${categoryName})`);
 
-            // Clear error after 5 seconds
             setTimeout(() => setError(null), 5000);
         }
     };
@@ -832,7 +758,6 @@ const AdminDashboard: React.FC = () => {
     const handleCategorySubmit = async (formData: FormData, isEdit: boolean, categoryId?: number) => {
         setCategoryFormLoading(true);
 
-        // Log all FormData entries before sending to backend
         console.log('=== SENDING CATEGORY TO BACKEND ===');
         for (const [key, value] of formData.entries()) {
             console.log('FormData:', key, value);
@@ -895,7 +820,6 @@ const AdminDashboard: React.FC = () => {
 
             setError(errorMessage);
 
-            // Keep the form open so user can fix the issues
         } finally {
             setCategoryFormLoading(false);
         }
@@ -909,16 +833,16 @@ const AdminDashboard: React.FC = () => {
             const [
                 productsData,
                 categoriesData,
-                couponsData  // ADD THIS LINE
+                couponsData 
             ] = await Promise.all([
                 adminService.getProducts(),
                 adminService.getCategories().catch(() => []),
-                adminService.getCoupons().catch(() => [])  // ADD THIS LINE
+                adminService.getCoupons().catch(() => []) 
             ]);
 
             setProducts(productsData);
             setCategories(categoriesData);
-            setCoupons(couponsData);  // ADD THIS LINE
+            setCoupons(couponsData); 
 
             await fetchSalesData(selectedPeriod);
             await fetchSalesOrders(1);
@@ -947,7 +871,7 @@ const AdminDashboard: React.FC = () => {
             case 'categories':
                 exportData(categories, 'categories_export');
                 break;
-            case 'coupons':                    // ADD THIS CASE
+            case 'coupons':                    
                 handleExportCoupons();
                 break;
             case 'promotions':
@@ -966,25 +890,23 @@ const AdminDashboard: React.FC = () => {
     // Promotion handlers
     const handleAddPromotion = () => {
         setEditingPromotion(null);
-        setShowPromotionForm(true); // Fix: Use correct state variable name
+        setShowPromotionForm(true); 
     };
 
-    const handleEditPromotion = (promotion: PromotionDto) => { // Fix: Use proper typing instead of 'any'
+    const handleEditPromotion = (promotion: PromotionDto) => {
         setEditingPromotion(promotion);
         setShowPromotionForm(true);
     };
 
-    const handleViewPromotion = (id: number) => { // Fix: Change to number to match component expectations
-        const promotion = promotions.find(p => p.id === id); // Convert number to string for comparison if needed
-        setViewingPromotion(promotion || null); // Fix: Handle undefined case
+    const handleViewPromotion = (id: number) => { 
+        const promotion = promotions.find(p => p.id === id); 
+        setViewingPromotion(promotion || null); 
     };
 
-    const handleDeletePromotion = async (id: number) => { // Fix: Change to number to match component expectations
+    const handleDeletePromotion = async (id: number) => {
         try {
             setLoading(true);
 
-            // Fix: Add the missing deletePromotion method to your adminService
-            // For now, let's create a temporary implementation
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5202'}/api/admin/promotions/${id}`, {
                 method: 'DELETE',
                 headers: {
@@ -997,27 +919,22 @@ const AdminDashboard: React.FC = () => {
                 throw new Error('Failed to delete promotion');
             }
 
-            // Refresh promotions list
             const updatedPromotions = await adminService.getPromotions();
             setPromotions(updatedPromotions);
 
-            setSuccessMessage('Promotion deleted successfully'); // Fix: Use your existing success message system
+            setSuccessMessage('Promotion deleted successfully'); 
             setTimeout(() => setSuccessMessage(null), 3000);
         } catch (error) {
             console.error('Error deleting promotion:', error);
-            setError('Failed to delete promotion'); // Fix: Use your existing error system
+            setError('Failed to delete promotion'); 
             setTimeout(() => setError(null), 5000);
         } finally {
             setLoading(false);
         }
     };
 
-    // Add the missing handlePromotionSubmit function
     const handleProductSubmit = async (formData: FormData, isEdit: boolean, productId?: number) => {
-        // Example implementation, adjust as needed for your backend/service
         try {
-            // Set loading state if needed
-            // setProductFormLoading(true);
 
             let result: ProductDto;
             if (isEdit && productId) {
@@ -1036,13 +953,11 @@ const AdminDashboard: React.FC = () => {
         } catch{
 
         } finally {
-            // setProductFormLoading(false);
         }
     };
 
     const handleExportPromotions = () => {
         try {
-            // Convert promotions to CSV format
             const headers = ['ID', 'Name', 'Description', 'Discount %', 'Start Date', 'End Date', 'Status', 'Type'];
             const csvData = promotions.map(promotion => [
                 promotion.id,
@@ -1055,13 +970,11 @@ const AdminDashboard: React.FC = () => {
                 promotion.type || 'N/A'
             ]);
 
-            // Create CSV content
             const csvContent = [
                 headers.join(','),
                 ...csvData.map(row => row.map(field => `"${field}"`).join(','))
             ].join('\n');
 
-            // Create and download file
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
             const url = URL.createObjectURL(blob);
@@ -1075,7 +988,6 @@ const AdminDashboard: React.FC = () => {
             console.log('Promotions exported successfully');
         } catch (error) {
             console.error('Error exporting promotions:', error);
-            // You might want to show a toast notification here
         }
     };
 
@@ -1106,11 +1018,9 @@ const AdminDashboard: React.FC = () => {
     };
 
     const handleDeleteCoupon = async (id: number) => {
-        // Find the coupon to get its code for the confirmation dialog
         const coupon = coupons.find(c => c.id === id);
         const couponName = coupon ? coupon.code : `Coupon #${id}`;
 
-        // Enhanced confirmation dialog
         const confirmed = window.confirm(
             `Are you sure you want to delete "${couponName}"?\n\n` +
             `This action cannot be undone. The coupon will be permanently removed.`
@@ -1118,29 +1028,23 @@ const AdminDashboard: React.FC = () => {
 
         if (!confirmed) return;
 
-        // Show loading state
         const originalCoupons = [...coupons];
 
         try {
-            // Optimistically remove from UI
             setCoupons(coupons.filter(coupon => coupon.id !== id));
 
-            // Attempt to delete on server
             await adminService.deleteCoupon(id);
 
-            // Show success message
             setSuccessMessage(`"${couponName}" has been deleted successfully!`);
             setTimeout(() => setSuccessMessage(null), 3000);
 
             console.log(`Coupon ${id} deleted successfully`);
 
         } catch (error) {
-            // Restore the original coupons list on error
             setCoupons(originalCoupons);
 
             console.error('Error deleting coupon:', error);
 
-            // Enhanced error message
             let errorMessage = 'Failed to delete coupon';
 
             if (error instanceof Error) {
@@ -1158,7 +1062,6 @@ const AdminDashboard: React.FC = () => {
                     errorMessage = error.message || 'An unexpected error occurred';
                 }
 
-                // Log detailed error information
                 if (extendedError.details) {
                     console.error('Delete error details:', extendedError.details);
                 }
@@ -1166,7 +1069,6 @@ const AdminDashboard: React.FC = () => {
 
             setError(`${errorMessage} (${couponName})`);
 
-            // Clear error after 5 seconds
             setTimeout(() => setError(null), 5000);
         }
     };
@@ -1175,7 +1077,6 @@ const AdminDashboard: React.FC = () => {
         try {
             const updatedCoupon = await adminService.toggleCouponVisibility(id);
 
-            // Update the coupon in the list
             setCoupons(coupons.map(coupon =>
                 coupon.id === id ? updatedCoupon : coupon
             ));
@@ -1207,7 +1108,6 @@ const AdminDashboard: React.FC = () => {
         setCouponFormLoading(true);
 
         try {
-            // Validate required fields
             if (!data.code || !data.code.trim()) {
                 throw new Error('Coupon code is required');
             }
@@ -1216,19 +1116,12 @@ const AdminDashboard: React.FC = () => {
                 throw new Error('Start date and end date are required');
             }
 
-            // Validate date range
             const startDate = new Date(data.startDate);
             const endDate = new Date(data.endDate);
             if (startDate >= endDate) {
                 throw new Error('End date must be after start date');
             }
 
-            console.log('=== COUPON SUBMISSION ===');
-            console.log('Is editing?', isEdit);
-            console.log('Coupon ID:', couponId);
-            console.log('Form data:', data);
-
-            // Create the payload that matches your DTO
             const payload = {
                 code: data.code.trim().toUpperCase(),
                 description: data.description?.trim() || '',
@@ -1240,8 +1133,6 @@ const AdminDashboard: React.FC = () => {
                 usageLimit: data.usageLimit && data.usageLimit > 0 ? Number(data.usageLimit) : undefined,
                 isActive: Boolean(data.isActive)
             };
-
-            console.log('Final payload for your CouponService:', payload);
 
             let result: CouponDto;
 
@@ -1260,22 +1151,18 @@ const AdminDashboard: React.FC = () => {
             setTimeout(() => setSuccessMessage(null), 3000);
 
         } catch (error) {
-            console.error('Error saving coupon:', error);
 
-            // Enhanced error logging and display
             let errorMessage = 'Failed to save coupon';
 
             if (error instanceof Error) {
                 console.error('Error message:', error.message);
                 errorMessage = error.message;
 
-                // Check if it's our enhanced error with details
                 const extendedError = error as ExtendedError;
                 if (extendedError.details) {
                     console.error('Error details:', extendedError.details);
                     const details = extendedError.details;
 
-                    // If we have validation errors, show them specifically
                     if (details && typeof details === 'object' && 'errors' in details) {
                         const errors = details.errors as Record<string, unknown>;
                         const validationErrors = Object.entries(errors)
@@ -1299,7 +1186,6 @@ const AdminDashboard: React.FC = () => {
 
             setError(errorMessage);
 
-            // Keep the form open so user can fix the issues
         } finally {
             setCouponFormLoading(false);
         }
@@ -1312,7 +1198,6 @@ const AdminDashboard: React.FC = () => {
 
     const handleExportCoupons = () => {
         try {
-            // Convert coupons to CSV format
             const headers = ['ID', 'Code', 'Description', 'Discount Type', 'Discount Amount', 'Min Order', 'Start Date', 'End Date', 'Usage Limit', 'Times Used', 'Status'];
             const csvData = coupons.map(coupon => [
                 coupon.id,
@@ -1328,13 +1213,11 @@ const AdminDashboard: React.FC = () => {
                 coupon.isActive ? 'Active' : 'Inactive'
             ]);
 
-            // Create CSV content
             const csvContent = [
                 headers.join(','),
                 ...csvData.map(row => row.map(field => `"${field}"`).join(','))
             ].join('\n');
 
-            // Create and download file
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
             const url = URL.createObjectURL(blob);
@@ -1347,15 +1230,12 @@ const AdminDashboard: React.FC = () => {
 
             setSuccessMessage('Coupons exported successfully!');
             setTimeout(() => setSuccessMessage(null), 3000);
-            console.log('Coupons exported successfully');
         } catch (error) {
-            console.error('Error exporting coupons:', error);
             setError('Failed to export coupons');
             setTimeout(() => setError(null), 5000);
         }
     };
 
-    // Fetch initial data
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -1366,20 +1246,19 @@ const AdminDashboard: React.FC = () => {
                     productsData,
                     categoriesData,
                     promotionsData,
-                    couponsData  // ADD THIS LINE
+                    couponsData  
                 ] = await Promise.all([
                     adminService.getProducts().catch(() => []),
                     adminService.getCategories().catch(() => []),
                     adminService.getPromotions().catch(() => []),
-                    adminService.getCoupons().catch(() => [])  // ADD THIS LINE
+                    adminService.getCoupons().catch(() => [])  
                 ])
 
                 setProducts(productsData)
                 setCategories(categoriesData)
                 setPromotions(promotionsData);
-                setCoupons(couponsData);  // ADD THIS LINE
+                setCoupons(couponsData);  
 
-                // Fetch sales data for the default period
                 await fetchSalesData(selectedPeriod);
                 await fetchReviews();
                 await fetchSalesOrders(1);
@@ -1395,7 +1274,6 @@ const AdminDashboard: React.FC = () => {
         fetchData()
     }, [selectedPeriod])
 
-    // Add dashboard background styles
     useEffect(() => {
         const styleElement = document.createElement('style');
         styleElement.setAttribute('id', 'admin-dashboard-style');
@@ -1924,7 +1802,6 @@ const AdminDashboard: React.FC = () => {
                                     </div>
                                 </div>
                             ) : (
-                                // ✅ Fixed EmptyState - Replace with simple div
                                 <div className="text-center py-8 text-gray-400">
                                     <div className="mb-4 flex justify-center">
                                         <MessageSquare className="h-12 w-12 text-gray-500" />

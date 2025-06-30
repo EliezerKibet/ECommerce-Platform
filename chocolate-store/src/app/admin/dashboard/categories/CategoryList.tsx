@@ -1,5 +1,4 @@
-﻿// CategoryList.tsx - CORRECT VERSION (Replace your current CategoryList.tsx with this)
-import React from 'react';
+﻿import React from 'react';
 import { Edit, Trash2, Eye, Plus, Download, Tag } from 'lucide-react';
 import { CategoryDto } from '../types';
 

@@ -178,7 +178,6 @@ export const PromotionForm: React.FC<PromotionFormProps> = ({
         const today = new Date();
         today.setHours(0, 0, 0, 0); // Reset time to start of day for comparison
 
-        // ✅ Fix: Only validate past dates for NEW promotions, not edits
         if (!editingPromotion && startDate < today) {
             return 'Start date cannot be in the past';
         }
@@ -288,11 +287,9 @@ export const PromotionForm: React.FC<PromotionFormProps> = ({
                     return;
                 }
             } else if (editingPromotion?.bannerImageUrl && !imageError) {
-                // Keep existing banner URL if no new image is uploaded and no error
                 bannerImageUrl = editingPromotion.bannerImageUrl;
             }
 
-            // ✅ Fix: For editing, preserve original start date if it's in the past
             let startDate = formData.startDate;
             if (editingPromotion) {
                 const originalStartDate = new Date(editingPromotion.startDate);
@@ -300,8 +297,6 @@ export const PromotionForm: React.FC<PromotionFormProps> = ({
                 const today = new Date();
                 today.setHours(0, 0, 0, 0);
 
-                // If the original promotion started in the past and user hasn't changed the date,
-                // keep the original date to avoid validation errors
                 if (originalStartDate < today && newStartDate.getTime() === originalStartDate.getTime()) {
                     startDate = editingPromotion.startDate.split('T')[0];
                 }

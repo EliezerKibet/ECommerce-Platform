@@ -1,9 +1,7 @@
-// categoryService.ts - Updated version
 import { CategoryDto, CategoryCreateUpdateDto, ExtendedError } from './types'
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5202'
 
-// Helper function to get auth headers
 function getAuthHeaders() {
     const token = localStorage.getItem('adminToken');
     return {
@@ -12,7 +10,6 @@ function getAuthHeaders() {
     };
 }
 
-// Enhanced helper function to handle API responses
 async function handleApiResponse<T>(response: Response): Promise<T> {
     if (!response.ok) {
         let errorMessage = `HTTP error! status: ${response.status}`

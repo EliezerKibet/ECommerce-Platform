@@ -13,20 +13,19 @@ export interface CategoryDto {
     isActive?: boolean;
     createdAt?: string;
     updatedAt?: string;
-    // Optional fields for statistics (if your API provides them)
     productCount?: number;
     totalSales?: number;
 }
 
 export interface CategoryWithStatus extends CategoryDto {
-    isActive: boolean; // Make this required instead of optional
+    isActive: boolean;
 }
 
 export interface CategoryCreateUpdateDto {
     name: string;
     description?: string;
     isActive: boolean;
-    image?: File; // For image upload
+    image?: File; 
     slug?: string;
     seoTitle?: string;
     seoDescription?: string;

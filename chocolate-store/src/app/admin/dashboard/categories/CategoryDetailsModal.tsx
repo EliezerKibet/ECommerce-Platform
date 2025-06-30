@@ -1,15 +1,11 @@
-// Updated CategoryDetailsModal.tsx with client-side filtering, product count, and images
 'use client'
 
-// Fixed import line - removed unused ImageOff icon
 import React, { useEffect, useState } from 'react'
 import { X, Tag, Package, Edit, Loader } from 'lucide-react'
 import { CategoryDto } from '../types'
 import { formatDate } from '../utils'
 
-// Add these two functions inside your CategoryDetailsModal component (right after imports)
 
-// Function to convert relative image paths to absolute URLs
 const getImageUrl = (imageUrl: string | undefined | null): string => {
     if (!imageUrl || imageUrl.trim() === '') {
         return '';
@@ -17,7 +13,6 @@ const getImageUrl = (imageUrl: string | undefined | null): string => {
 
     const cleanImageUrl = imageUrl.trim();
 
-    // If it's already a full URL, return as-is
     if (cleanImageUrl.startsWith('http://') ||
         cleanImageUrl.startsWith('https://') ||
         cleanImageUrl.startsWith('data:') ||
@@ -25,33 +20,27 @@ const getImageUrl = (imageUrl: string | undefined | null): string => {
         return cleanImageUrl;
     }
 
-    // If path includes /uploads/, extract the filename
     if (cleanImageUrl.includes('/uploads/')) {
         const parts = cleanImageUrl.split('/uploads/');
         const filename = parts[parts.length - 1];
         return `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5202'}/uploads/${filename}`;
     }
 
-    // Handle paths that start with uploads/
     if (cleanImageUrl.startsWith('uploads/')) {
         const filename = cleanImageUrl.substring(8);
         return `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5202'}/uploads/${filename}`;
     }
 
-    // For just a filename, append to API URL
     return `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5202'}/uploads/${cleanImageUrl}`;
 };
 
-// Function to fix issues with image URLs using port 3000
 const fixImageUrl = (url: string): string => {
     if (!url) return '';
 
-    // Fix the common port 3000 issue
     if (url.includes(':3000/uploads/')) {
         return url.replace(':3000/uploads/', `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5202'}/uploads/`);
     }
 
-    // Fix URLs that might use relative paths
     if (url.startsWith('/uploads/')) {
         return `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5202'}${url}`;
     }
@@ -59,14 +48,13 @@ const fixImageUrl = (url: string): string => {
     return url;
 };
 
-// Add this type for related products
 interface Product {
     id: number;
     name: string;
     price: number;
     imageUrl?: string;
     sku?: string;
-    categoryId: number; // Important for filtering
+    categoryId: number; 
 }
 
 interface CategoryDetailsModalProps {
@@ -86,25 +74,17 @@ export const CategoryDetailsModal: React.FC<CategoryDetailsModalProps> = ({
     const [totalProductCount, setTotalProductCount] = useState(0);
     const [loading, setLoading] = useState(false);
 
-    // Fetch related products when the modal opens with a category
     useEffect(() => {
         if (isOpen && category) {
             fetchRelatedProducts(category.id);
         }
     }, [isOpen, category]);
 
-    // Function to fetch related products - client-side filtering approach
-    // Improved image debugging in fetchRelatedProducts function
-    // This helps log URL information to troubleshoot image issues
-
-    // Replace your fetchRelatedProducts function with this enhanced version:
-
     const fetchRelatedProducts = async (categoryId: number) => {
         try {
             setLoading(true);
             console.log(`Fetching all products to filter for category ${categoryId}...`);
 
-            // Use the existing products endpoint that we know works
             const apiUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5202'}/api/admin/products`;
             console.log(`API URL: ${apiUrl}`);
 
@@ -119,26 +99,21 @@ export const CategoryDetailsModal: React.FC<CategoryDetailsModalProps> = ({
             const data = await response.json();
             console.log('API response received');
 
-            // Handle $values wrapper if it exists
             const allProducts = data.$values ? data.$values : data;
 
-            // Filter products by category ID
             const filteredProducts = Array.isArray(allProducts)
                 ? allProducts.filter(product => product.categoryId === categoryId)
                 : [];
 
             console.log(`Filtered ${filteredProducts.length} products for category ${categoryId}`);
 
-            // Debug: Check first product's image URL if available
             if (filteredProducts.length > 0 && filteredProducts[0].imageUrl) {
                 console.log('First product image URL:', filteredProducts[0].imageUrl);
                 console.log('Processed URL:', fixImageUrl(getImageUrl(filteredProducts[0].imageUrl)));
             }
 
-            // Set total product count for the category
             setTotalProductCount(filteredProducts.length);
 
-            // Take only the first 5 products for display
             const limitedProducts = filteredProducts.slice(0, 5);
             setRelatedProducts(limitedProducts);
         } catch (error) {
