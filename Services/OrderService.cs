@@ -5,6 +5,7 @@ using ECommerce.API.Interfaces;
 using ECommerce.API.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using static ECommerce.API.DTOs.AppliedPromotionDto;
 
 namespace ECommerce.API.Services
 {

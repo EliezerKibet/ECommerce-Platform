@@ -1,4 +1,6 @@
-﻿namespace ECommerce.API.DTOs
+﻿using static ECommerce.API.DTOs.AppliedPromotionDto;
+
+namespace ECommerce.API.DTOs
 {
     public class ReceiptDto
     {
@@ -48,21 +50,22 @@
         public decimal DiscountPercentage { get; set; }
         public string Type { get; set; } = string.Empty;
         public decimal AppliedDiscount { get; set; }
-        public string ProductName { get; set; } = string.Empty; 
+        public string ProductName { get; set; } = string.Empty;
 
-    public class ReceiptItemDto
-    {
-        public string ProductName { get; set; }
-        public string ProductImage { get; set; }
-        public string CocoaPercentage { get; set; }
-        public string Origin { get; set; }
-        public decimal Price { get; set; }
-        public int Quantity { get; set; }
-        public decimal Subtotal { get; set; }
-        public bool IsGiftWrapped { get; set; }
+        public class ReceiptItemDto
+        {
+            public string ProductName { get; set; }
+            public string ProductImage { get; set; }
+            public string CocoaPercentage { get; set; }
+            public string Origin { get; set; }
+            public decimal Price { get; set; }
+            public int Quantity { get; set; }
+            public decimal Subtotal { get; set; }
+            public bool IsGiftWrapped { get; set; }
 
-        public decimal OriginalPrice { get; set; } 
-        public decimal DiscountAmount { get; set; } 
-        public List<string> AppliedPromotionNames { get; set; } = new();
+            public decimal OriginalPrice { get; set; }
+            public decimal DiscountAmount { get; set; }
+            public List<string> AppliedPromotionNames { get; set; } = new();
+        }
     }
 }

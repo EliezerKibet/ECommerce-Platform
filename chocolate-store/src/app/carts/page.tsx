@@ -1,4 +1,5 @@
-﻿use client';
+﻿/* eslint-disable @typescript-eslint/no-unused-vars */
+'use client';
 
 import React, { useState, useEffect } from 'react';
 import { Trash2, Plus, Minus, Gift, ShoppingBag, ArrowRight, Heart, MapPin, Loader2, CheckCircle } from 'lucide-react';
@@ -1523,7 +1524,7 @@ const EnhancedChocolateCartPage = () => {
 
             if (response.ok) {
                 const order = await response.json();
-                    checkoutFormData.shippingAddress.email || checkoutFormData.customerEmail || 'unknown');
+                    console.log(checkoutFormData.shippingAddress.email || checkoutFormData.customerEmail || 'unknown');
 
                 setCheckoutStep('success');
 
