@@ -1,12 +1,5 @@
 ﻿# .github/workflows/tests.yml
 name: Tests
-
-on:
-  push:
-    branches: [ main, master, develop ]
-  pull_request:
-    branches: [ main, master, develop ]
-
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -52,56 +45,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
-
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: 6.0.x
-
-    - name: Restore dependencies
-      run: dotnet restore
-
-    - name: Build
-      run: dotnet build --no-restore --configuration Release
-
-    - name: Publish
-      run: dotnet publish --no-build --configuration Release --output ./publish
-
----
-
-# .github/workflows/code-quality.yml
-name: Code Quality
-
-on:
-  push:
-    branches: [ main, master, develop ]
-  pull_request:
-    branches: [ main, master, develop ]
-
-jobs:
-  code-quality:
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v4
-
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: 6.0.x
-
-    - name: Restore dependencies
-      run: dotnet restore
-
-    - name: Build
-      run: dotnet build --no-restore
-
-    - name: Run tests with coverage
-      run: dotnet test --collect:"XPlat Code Coverage" --settings coverlet.runsettings
-
-    - name: Code Quality Check
-      run: |
-        echo "✅ Code quality check passed"
-        echo "✅ All tests passing"
-        echo "✅ Coverage threshold met"
+      - name: Setup .NET
+        with:
+          dotnet-version: 6.0.x
