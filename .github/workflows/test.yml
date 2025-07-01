@@ -1,79 +1,14 @@
+# .github/workflows/tests.yml
 name: Tests
-
-on:
-  push:
-    branches: [ main, develop ]
-  pull_request:
-    branches: [ main, develop ]
-
+on: [push, pull_request]
 jobs:
   test:
     runs-on: ubuntu-latest
-    
-    strategy:
-      matrix:
-        node-version: [18.x, 20.x]
-    
-    services:
-      postgres:
-        image: postgres:13
-        env:
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: ecommerce_test
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 5432:5432
-      
-      redis:
-        image: redis:6
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 6379:6379
-
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ matrix.node-version }}
-        cache: 'npm'
-    
-    - name: Install dependencies
-      run: npm ci
-    
-    - name: Run linting
-      run: npm run lint
-    
-    - name: Run type checking
-      run: npm run type-check
-    
-    - name: Run unit tests
-      run: npm run test:unit
-      env:
-        NODE_ENV: test
-    
-    - name: Run integration tests
-      run: npm run test:integration
-      env:
-        NODE_ENV: test
-        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/ecommerce_test
-        REDIS_URL: redis://localhost:6379
-    
-    - name: Run e2e tests
-      run: npm run test:e2e
-      env:
-        NODE_ENV: test
-        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/ecommerce_test
-    
-    - name: Upload coverage reports
-      uses: codecov/codecov-action@v3
-      if: matrix.node-version == '20.x'
+      - uses: actions/checkout@v3
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 6.0.x
+      - name: Run tests
+        run: dotnet test --verbosity normal
