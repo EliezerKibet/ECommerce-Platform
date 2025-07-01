@@ -63,7 +63,6 @@ export default function ResetPasswordPage() {
             if (response.ok) {
                 toast.success('Password reset successful!');
 
-                // Redirect to login page after successful reset
                 setTimeout(() => {
                     router.push('/auth/login');
                 }, 2000);

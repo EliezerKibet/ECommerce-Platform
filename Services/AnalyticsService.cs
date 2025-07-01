@@ -3,7 +3,7 @@ using ECommerce.API.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 
-// Services/AnalyticsService.cs
+
 public class AnalyticsService : IAnalyticsService
 {
     private readonly ApplicationDbContext _context;
@@ -20,15 +20,14 @@ public class AnalyticsService : IAnalyticsService
         _logger = logger;
     }
 
-    // Add this method to AnalyticsService.cs
+
     public async Task<object> GetDashboardDataAsync()
     {
-        // Get last 30 days as default range
+
         var endDate = DateTime.UtcNow;
         var startDate = endDate.AddDays(-30);
 
-        // Execute all queries with the regular DbContext
-        // Sales Summary
+
         var orders = await _context.Orders
             .Where(o => o.OrderDate >= startDate && o.OrderDate <= endDate)
             .Include(o => o.OrderItems)
@@ -115,7 +114,7 @@ public class AnalyticsService : IAnalyticsService
         };
     }
 
-    // Sales Analytics
+
     public async Task<object> GetSalesSummaryAsync(DateTime? startDate = null, DateTime? endDate = null)
     {
         startDate ??= DateTime.UtcNow.AddMonths(-1);
@@ -126,12 +125,12 @@ public class AnalyticsService : IAnalyticsService
             .Include(o => o.OrderItems)
             .ToListAsync();
 
-        // Calculate key metrics
+
         var totalSales = orders.Sum(o => o.TotalAmount);
         var totalOrders = orders.Count;
         var averageOrderValue = totalOrders > 0 ? totalSales / totalOrders : 0;
 
-        // Sales by day
+
         var salesByDay = orders
             .GroupBy(o => o.OrderDate.Date)
             .Select(g => new {
@@ -220,7 +219,7 @@ public class AnalyticsService : IAnalyticsService
         };
     }
 
-    // Promotion Analytics
+
     public async Task<object> GetPromotionPerformanceAsync(int? promotionId = null)
     {
         IQueryable<Promotion> promotionsQuery = _context.Promotions
@@ -239,7 +238,7 @@ public class AnalyticsService : IAnalyticsService
         {
             var productIds = promotion.Products.Select(pp => pp.ProductId).ToList();
 
-            // Get orders with these products during the promotion period
+
             var orderItemsInPromotion = await _context.OrderItems
                 .Where(oi => productIds.Contains(oi.ProductId) &&
                        oi.Order.OrderDate >= promotion.StartDate &&
@@ -252,12 +251,12 @@ public class AnalyticsService : IAnalyticsService
                 .Distinct()
                 .ToList();
 
-            // Calculate metrics
+
             var totalRevenue = orderItemsInPromotion.Sum(oi => oi.ProductPrice * oi.Quantity);
             var totalOrders = ordersDuringPromotion.Count;
             var totalUnitsSold = orderItemsInPromotion.Sum(oi => oi.Quantity);
 
-            // Get sales before promotion for comparison (same duration)
+
             var promotionDurationDays = (promotion.EndDate - promotion.StartDate).TotalDays;
             var periodBeforePromotion = new
             {
@@ -274,7 +273,6 @@ public class AnalyticsService : IAnalyticsService
             var revenueBeforePromotion = orderItemsBeforePromotion.Sum(oi => oi.ProductPrice * oi.Quantity);
             var unitsSoldBeforePromotion = orderItemsBeforePromotion.Sum(oi => oi.Quantity);
 
-            // Calculate percentage changes
             var revenueChange = revenueBeforePromotion > 0
                 ? ((totalRevenue - revenueBeforePromotion) / revenueBeforePromotion) * 100
                 : 0;
@@ -283,7 +281,6 @@ public class AnalyticsService : IAnalyticsService
                 ? ((totalUnitsSold - unitsSoldBeforePromotion) / (double)unitsSoldBeforePromotion) * 100
                 : 0;
 
-            // Top selling products during promotion
             var topProducts = orderItemsInPromotion
                 .GroupBy(oi => oi.ProductId)
                 .Select(g => new
@@ -332,7 +329,6 @@ public class AnalyticsService : IAnalyticsService
 
         var productIds = promotion.Products.Select(pp => pp.ProductId).ToList();
 
-        // Get the daily sales data before, during, and after the promotion
         var beforePeriodStart = promotion.StartDate.AddDays(-30);
         var afterPeriodEnd = promotion.EndDate.AddDays(30);
 
@@ -343,7 +339,6 @@ public class AnalyticsService : IAnalyticsService
             .Include(oi => oi.Order)
             .ToListAsync();
 
-        // Group by day
         var salesByDay = orderItems
             .GroupBy(oi => oi.Order.OrderDate.Date)
             .Select(g => new
@@ -357,7 +352,6 @@ public class AnalyticsService : IAnalyticsService
             .OrderBy(x => x.Date)
             .ToList();
 
-        // Calculate period averages
         var beforeAvg = salesByDay.Where(x => x.Period == "Before")
             .DefaultIfEmpty(new { Date = DateTime.MinValue, Revenue = 0m, Units = 0, Period = "Before" })
             .Average(x => x.Revenue);
@@ -392,25 +386,21 @@ public class AnalyticsService : IAnalyticsService
         };
     }
 
-    // Customer Analytics
     public async Task<object> GetCustomerAcquisitionAsync(DateTime? startDate = null, DateTime? endDate = null)
     {
         startDate ??= DateTime.UtcNow.AddMonths(-6);
         endDate ??= DateTime.UtcNow;
 
-        // Get all users who registered in the date range
         var newUsers = await _context.Users
             .Where(u => u.RegisteredDate >= startDate && u.RegisteredDate <= endDate)
             .ToListAsync();
 
-        // Group by day or month depending on range
         var groupByMonth = (endDate.Value - startDate.Value).TotalDays > 90;
 
         var acquisitionData = newUsers;
 
         if (groupByMonth)
         {
-            // Group by month
             var byMonth = newUsers
                 .GroupBy(u => new { Year = u.RegisteredDate.Year, Month = u.RegisteredDate.Month })
                 .Select(g => new
@@ -421,7 +411,6 @@ public class AnalyticsService : IAnalyticsService
                 .OrderBy(x => x.Period)
                 .ToList();
 
-            // Calculate cumulative total
             int runningTotal = 0;
             var cumulativeData = byMonth.Select(x =>
             {
@@ -444,7 +433,6 @@ public class AnalyticsService : IAnalyticsService
         }
         else
         {
-            // Group by day
             var byDay = newUsers
                 .GroupBy(u => u.RegisteredDate.Date)
                 .Select(g => new
@@ -455,7 +443,6 @@ public class AnalyticsService : IAnalyticsService
                 .OrderBy(x => x.Date)
                 .ToList();
 
-            // Calculate cumulative total
             int runningTotal = 0;
             var cumulativeData = byDay.Select(x =>
             {
@@ -480,10 +467,8 @@ public class AnalyticsService : IAnalyticsService
 
     public async Task<object> GetCustomerRetentionAsync()
     {
-        // Define cohorts by month (users who made their first purchase in a specific month)
         var sixMonthsAgo = DateTime.UtcNow.AddMonths(-6);
 
-        // Get first order date for each user
         var firstOrderDates = await _context.Orders
             .Where(o => o.OrderDate >= sixMonthsAgo)
             .GroupBy(o => o.UserId)
@@ -494,7 +479,6 @@ public class AnalyticsService : IAnalyticsService
             })
             .ToListAsync();
 
-        // Group users into cohorts by month of first purchase
         var cohorts = firstOrderDates
             .GroupBy(x => new { Year = x.FirstOrderDate.Year, Month = x.FirstOrderDate.Month })
             .Select(g => new
@@ -505,12 +489,10 @@ public class AnalyticsService : IAnalyticsService
             .OrderBy(x => x.CohortDate)
             .ToList();
 
-        // Get all orders for retention analysis
         var allOrders = await _context.Orders
             .Where(o => o.OrderDate >= sixMonthsAgo)
             .ToListAsync();
 
-        // Calculate retention by month for each cohort
         var retentionData = new List<object>();
 
         foreach (var cohort in cohorts)
@@ -522,16 +504,13 @@ public class AnalyticsService : IAnalyticsService
 
             var retentionByMonth = new List<object>();
 
-            // Calculate retention for up to 6 months after the cohort month
             for (int i = 0; i <= 6; i++)
             {
                 var monthStart = cohort.CohortDate.AddMonths(i);
                 var monthEnd = monthStart.AddMonths(1).AddDays(-1);
 
-                // Skip future months
                 if (monthStart > DateTime.UtcNow) break;
 
-                // Count users who placed orders in this month
                 var activeUsers = allOrders
                     .Where(o => cohortUsers.Contains(o.UserId) &&
                            o.OrderDate >= monthStart &&
@@ -584,7 +563,6 @@ public class AnalyticsService : IAnalyticsService
             .Take(count)
             .ToListAsync();
 
-        // Get user names
         var userIds = customers.Select(c => c.UserId).ToList();
         var users = await _context.Users
             .Where(u => userIds.Contains(u.Id))
@@ -610,7 +588,6 @@ public class AnalyticsService : IAnalyticsService
         };
     }
 
-    // Product Analytics
     public async Task<object> GetTopSellingProductsAsync(int count = 10)
     {
         var topProducts = await _context.OrderItems
@@ -635,7 +612,6 @@ public class AnalyticsService : IAnalyticsService
 
     public async Task<object> GetProductViewsToSalesRatioAsync()
     {
-        // Get product views (assuming you have a ProductViews table or similar)
         var productViews = await _context.ProductViews
             .GroupBy(pv => pv.ProductId)
             .Select(g => new
@@ -645,7 +621,6 @@ public class AnalyticsService : IAnalyticsService
             })
             .ToListAsync();
 
-        // Get product sales
         var productSales = await _context.OrderItems
             .GroupBy(oi => oi.ProductId)
             .Select(g => new
@@ -655,7 +630,6 @@ public class AnalyticsService : IAnalyticsService
             })
             .ToListAsync();
 
-        // Get product names
         var productIds = productViews.Select(pv => pv.ProductId)
             .Union(productSales.Select(ps => ps.ProductId))
             .ToList();
@@ -664,7 +638,6 @@ public class AnalyticsService : IAnalyticsService
             .Where(p => productIds.Contains(p.Id))
             .ToDictionaryAsync(p => p.Id, p => p.Name);
 
-        // Calculate conversion rates
         var conversionData = productIds.Select(id =>
         {
             var views = productViews.FirstOrDefault(pv => pv.ProductId == id)?.ViewCount ?? 0;
@@ -692,14 +665,12 @@ public class AnalyticsService : IAnalyticsService
         };
     }
 
-    // Inventory Analytics
     public async Task<object> GetInventoryStatusAsync()
     {
         var products = await _context.Products
             .Include(p => p.Category)
             .ToListAsync();
 
-        // Group by status
         var stockStatus = products
             .GroupBy(p => p.StockQuantity switch
             {
@@ -722,7 +693,6 @@ public class AnalyticsService : IAnalyticsService
             })
             .ToDictionary(g => g.Status, g => g);
 
-        // Calculate inventory value
         var totalInventoryValue = products.Sum(p => p.Price * p.StockQuantity);
         var inventoryValueByCategory = products
             .GroupBy(p => p.CategoryId)
@@ -763,7 +733,6 @@ public class AnalyticsService : IAnalyticsService
             .OrderBy(p => p.StockQuantity)
             .ToListAsync();
 
-        // Get sales velocity for these products (30-day average)
         var thirtyDaysAgo = DateTime.UtcNow.AddDays(-30);
         var productIds = lowStockProducts.Select(p => p.Id).ToList();
 
@@ -775,12 +744,10 @@ public class AnalyticsService : IAnalyticsService
             {
                 ProductId = g.Key,
                 UnitsSold = g.Sum(oi => oi.Quantity),
-                // Units sold per day
                 DailySalesRate = g.Sum(oi => oi.Quantity) / 30.0
             })
             .ToDictionaryAsync(x => x.ProductId, x => x);
 
-        // Combine data
         var result = lowStockProducts.Select(p => new
         {
             Id = p.Id,
@@ -803,25 +770,19 @@ public class AnalyticsService : IAnalyticsService
         };
     }
 
-    // Add these methods to your AnalyticsService class
-
-    // Get all-time sales summary (no date restrictions)
     public async Task<object> GetAllTimeSalesAsync()
     {
         var orders = await _context.Orders
             .Include(o => o.OrderItems)
             .ToListAsync();
 
-        // Calculate key metrics for all time
         var totalSales = orders.Sum(o => o.TotalAmount);
         var totalOrders = orders.Count;
         var averageOrderValue = totalOrders > 0 ? totalSales / totalOrders : 0;
 
-        // Get first and last order dates
         var firstOrder = orders.OrderBy(o => o.OrderDate).FirstOrDefault();
         var lastOrder = orders.OrderByDescending(o => o.OrderDate).FirstOrDefault();
 
-        // Sales by month (all time)
         var salesByMonth = orders
             .GroupBy(o => new { Year = o.OrderDate.Year, Month = o.OrderDate.Month })
             .Select(g => new {
@@ -832,7 +793,6 @@ public class AnalyticsService : IAnalyticsService
             .OrderBy(x => x.Period)
             .ToList();
 
-        // Sales by year
         var salesByYear = orders
             .GroupBy(o => o.OrderDate.Year)
             .Select(g => new {
@@ -861,7 +821,6 @@ public class AnalyticsService : IAnalyticsService
         };
     }
 
-    // Get all sales orders with pagination
     public async Task<object> GetAllSalesOrdersAsync(int page = 1, int pageSize = 50)
     {
         try

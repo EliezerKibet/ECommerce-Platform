@@ -86,7 +86,7 @@ namespace ECommerce.API.Data
                 .HasOne(ci => ci.Product)
                 .WithMany()
                 .HasForeignKey(ci => ci.ProductId)
-                .OnDelete(DeleteBehavior.Restrict); // Don't delete product if in cart
+                .OnDelete(DeleteBehavior.Restrict);
 
             // Address configuration
             modelBuilder.Entity<ShippingAddress>()

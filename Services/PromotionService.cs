@@ -310,11 +310,9 @@ namespace ECommerce.API.Services
             if (product == null)
                 throw new KeyNotFoundException($"Product with ID {productId} not found");
 
-            // Check if product is already in the promotion
             if (promotion.Products.Any(pp => pp.ProductId == productId))
                 throw new InvalidOperationException($"Product with ID {productId} is already in the promotion");
 
-            // Add product to promotion
             promotion.Products.Add(new PromotionProduct
             {
                 PromotionId = promotionId,
@@ -323,7 +321,6 @@ namespace ECommerce.API.Services
 
             await _context.SaveChangesAsync();
 
-            // Use your custom mapping method
             return await MapPromotionToDto(promotion);
         }
 
@@ -336,18 +333,15 @@ namespace ECommerce.API.Services
             if (promotion == null)
                 throw new KeyNotFoundException($"Promotion with ID {promotionId} not found");
 
-            // Find the promotion-product relationship to remove
             var promotionProduct = promotion.Products.FirstOrDefault(pp => pp.ProductId == productId);
 
             if (promotionProduct == null)
                 throw new KeyNotFoundException($"Product with ID {productId} is not in the promotion");
 
-            // Remove the relationship
             promotion.Products.Remove(promotionProduct);
 
             await _context.SaveChangesAsync();
 
-            // Use your custom mapping method
             return await MapPromotionToDto(promotion);
         }
 

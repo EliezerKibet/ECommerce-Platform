@@ -1,5 +1,4 @@
-﻿// Services/SearchService.cs
-using AutoMapper;
+﻿using AutoMapper;
 using ECommerce.API.Data;
 using ECommerce.API.Interfaces;
 using ECommerce.API.Models;
@@ -27,11 +26,9 @@ public class SearchService : ISearchService
     {
         try
         {
-            // Start with base query
             IQueryable<Product> productsQuery = _context.Products
                 .Include(p => p.Category);
 
-            // Apply text search if provided
             if (!string.IsNullOrWhiteSpace(query.Query))
             {
                 string searchTerm = query.Query.ToLower().Trim();
@@ -44,13 +41,11 @@ public class SearchService : ISearchService
                 );
             }
 
-            // Apply category filter
             if (query.CategoryIds != null && query.CategoryIds.Any())
             {
                 productsQuery = productsQuery.Where(p => query.CategoryIds.Contains(p.CategoryId));
             }
 
-            // Apply price range filter
             if (query.MinPrice.HasValue)
             {
                 productsQuery = productsQuery.Where(p => p.Price >= query.MinPrice.Value);
@@ -61,38 +56,30 @@ public class SearchService : ISearchService
                 productsQuery = productsQuery.Where(p => p.Price <= query.MaxPrice.Value);
             }
 
-            // Apply origin filter
             if (query.Origins != null && query.Origins.Any())
             {
                 productsQuery = productsQuery.Where(p => query.Origins.Contains(p.Origin));
             }
 
-            // Apply flavor profiles filter
             if (query.FlavorProfiles != null && query.FlavorProfiles.Any())
             {
-                // Since FlavorNotes is a comma-separated string, we need to check if any of the requested profiles is in there
                 productsQuery = productsQuery.Where(p =>
                     query.FlavorProfiles.Any(flavor => p.FlavorNotes.Contains(flavor))
                 );
             }
 
-            // Apply organic filter
             if (query.IsOrganic.HasValue)
             {
                 productsQuery = productsQuery.Where(p => p.IsOrganic == query.IsOrganic.Value);
             }
 
-            // Apply fair trade filter
             if (query.IsFairTrade.HasValue)
             {
                 productsQuery = productsQuery.Where(p => p.IsFairTrade == query.IsFairTrade.Value);
             }
 
-            // Apply cocoa percentage filter
             if (query.MinCocoaPercentage.HasValue)
             {
-                // Extract the percentage as a number from the string (e.g., "72%" -> 72)
-                // To:
                 productsQuery = productsQuery.Where(p =>
                     p.CocoaPercentage.Replace("%", "") != null &&
                     int.Parse(string.IsNullOrEmpty(p.CocoaPercentage) ? "0" : p.CocoaPercentage.Replace("%", "")) >= query.MinCocoaPercentage.Value
@@ -101,30 +88,24 @@ public class SearchService : ISearchService
 
             if (query.MaxCocoaPercentage.HasValue)
             {
-                // To:
                 productsQuery = productsQuery.Where(p =>
                     p.CocoaPercentage.Replace("%", "") != null &&
                     int.Parse(string.IsNullOrEmpty(p.CocoaPercentage) ? "0" : p.CocoaPercentage.Replace("%", "")) >= query.MinCocoaPercentage.Value
                 );
             }
 
-            // Apply allergen exclusion
             if (query.Allergens != null && query.Allergens.Any())
             {
                 foreach (var allergen in query.Allergens)
                 {
-                    // Exclude products that contain the allergen
                     productsQuery = productsQuery.Where(p => !p.AllergenInfo.Contains(allergen));
                 }
             }
 
-            // Calculate total before applying pagination
             var totalItems = await productsQuery.CountAsync();
 
-            // Apply sorting
             productsQuery = ApplySorting(productsQuery, query.SortBy, query.SortDescending);
 
-            // Apply pagination
             var pageSize = query.PageSize;
             var pageNumber = query.Page;
             var skip = (pageNumber - 1) * pageSize;
@@ -134,10 +115,8 @@ public class SearchService : ISearchService
                 .Take(pageSize)
                 .ToListAsync();
 
-            // Map products to DTOs
             var productDtos = _mapper.Map<List<ProductDto>>(products);
 
-            // Create paged result
             var result = new PagedResult<ProductDto>
             {
                 Items = productDtos,
@@ -147,8 +126,7 @@ public class SearchService : ISearchService
                 TotalPages = (int)Math.Ceiling(totalItems / (double)pageSize)
             };
 
-            // Track search query for analytics (optional)
-            await TrackSearchQuery(query, result.TotalItems); // Add the second parameter
+            await TrackSearchQuery(query, result.TotalItems); 
             return result;
         }
         catch (Exception ex)
@@ -166,8 +144,6 @@ public class SearchService : ISearchService
         }
 
         query = query.ToLower().Trim();
-
-        // Get product names that match the query
         var productSuggestions = await _context.Products
             .Where(p => p.Name.ToLower().Contains(query))
             .Select(p => p.Name)
@@ -175,7 +151,6 @@ public class SearchService : ISearchService
             .Take(5)
             .ToListAsync();
 
-        // Get category names that match the query
         var categorySuggestions = await _context.Categories
             .Where(c => c.Name.ToLower().Contains(query))
             .Select(c => c.Name)
@@ -183,7 +158,6 @@ public class SearchService : ISearchService
             .Take(3)
             .ToListAsync();
 
-        // Get origin suggestions
         var originSuggestions = await _context.Products
             .Where(p => p.Origin.ToLower().Contains(query))
             .Select(p => p.Origin)
@@ -191,13 +165,11 @@ public class SearchService : ISearchService
             .Take(3)
             .ToListAsync();
 
-        // Combine all suggestions
         var allSuggestions = new List<string>();
         allSuggestions.AddRange(productSuggestions);
         allSuggestions.AddRange(categorySuggestions);
         allSuggestions.AddRange(originSuggestions);
 
-        // Remove duplicates and take top 10
         return allSuggestions
             .Distinct()
             .Take(10)
@@ -206,7 +178,6 @@ public class SearchService : ISearchService
 
     public async Task<SearchFiltersDto> GetAvailableFiltersAsync()
     {
-        // Get all categories with product counts
         var categories = await _context.Categories
             .Select(c => new CategoryFilterDto
             {
@@ -216,7 +187,6 @@ public class SearchService : ISearchService
             })
             .ToListAsync();
 
-        // Get price range
         var priceRange = await _context.Products
             .Select(p => new
             {
@@ -225,14 +195,12 @@ public class SearchService : ISearchService
             })
             .FirstOrDefaultAsync();
 
-        // Get all origins
         var origins = await _context.Products
             .Select(p => p.Origin)
             .Distinct()
             .Where(o => !string.IsNullOrEmpty(o))
             .ToListAsync();
 
-        // Extract flavor profiles
         var allFlavorNotes = await _context.Products
             .Select(p => p.FlavorNotes)
             .Where(fn => !string.IsNullOrEmpty(fn))
@@ -248,7 +216,6 @@ public class SearchService : ISearchService
             }
         }
 
-        // Extract allergens
         var allAllergenInfo = await _context.Products
             .Select(p => p.AllergenInfo)
             .Where(ai => !string.IsNullOrEmpty(ai))
@@ -267,7 +234,6 @@ public class SearchService : ISearchService
             }
         }
 
-        // Get cocoa percentage range
         var cocoaRange = new CocoaRangeDto
         {
             MinPercentage = 0,
@@ -314,8 +280,6 @@ public class SearchService : ISearchService
 
     public async Task<List<string>> GetPopularSearchesAsync()
     {
-        // This would ideally come from a SearchQuery tracking table
-        // For now, return sample data or most viewed products
         var topProducts = await _context.Products
             .OrderByDescending(p => p.AverageRating)
             .Take(5)
@@ -342,12 +306,10 @@ public class SearchService : ISearchService
                     ? query.OrderByDescending(p => p.AverageRating)
                     : query.OrderBy(p => p.AverageRating);
             case "popularity":
-                // Assuming review count is a measure of popularity
                 return descending
                     ? query.OrderByDescending(p => p.ReviewCount)
                     : query.OrderBy(p => p.ReviewCount);
             default:
-                // Default sorting by newest
                 return query.OrderByDescending(p => p.Id);
         }
     }
@@ -356,11 +318,9 @@ public class SearchService : ISearchService
     {
         try
         {
-            // Get user ID if authenticated
             string userId = null;
             string guestId = null;
 
-            // Get user/guest ID from HttpContext
             var httpContext = new HttpContextAccessor().HttpContext;
             if (httpContext?.User?.Identity?.IsAuthenticated == true)
             {
@@ -368,11 +328,9 @@ public class SearchService : ISearchService
             }
             else
             {
-                // Try to get guest ID from cookies
                 guestId = httpContext?.Request.Cookies["GuestId"];
             }
 
-            // Create search query record
             var searchQuery = new SearchQuery
             {
                 Query = query.Query,
@@ -402,7 +360,6 @@ public class SearchService : ISearchService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error tracking search query");
-            // Continue without tracking the query
         }
     }
 }

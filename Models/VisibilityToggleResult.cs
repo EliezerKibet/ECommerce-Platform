@@ -1,5 +1,4 @@
-﻿// New file: VisibilityToggleResult.cs
-namespace ECommerce.API.Models
+﻿namespace ECommerce.API.Models
 {
     public class VisibilityToggleResult
     {

@@ -1,11 +1,9 @@
-﻿'use client';
+﻿use client';
 
 import React, { useState, useEffect } from 'react';
 import { Trash2, Plus, Minus, Gift, ShoppingBag, ArrowRight, Heart, MapPin, Loader2, CheckCircle } from 'lucide-react';
 import { ProductDto } from '../../services/adminServices';
 import { useRouter } from 'next/navigation';
-
-// Keep your existing interfaces
 interface CartItem {
     id: number;
     productId: number;
@@ -52,7 +50,6 @@ interface AspNetResponse {
     itemCount: number;
 }
 
-// New interfaces for checkout
 interface ShippingAddress {
     fullName: string;
     addressLine1: string;
@@ -113,18 +110,17 @@ interface Promotion {
     id: number;
     name: string;
     description: string;
-    discountPercentage: number; // ✅ Your backend uses this
+    discountPercentage: number; 
     startDate: string;
     endDate: string;
     isActive: boolean;
     bannerImageUrl?: string;
-    type: string; // ✅ Your backend uses string, not enum
+    type: string; 
     colorScheme?: string;
     timeRemaining: number;
     products: ProductDto[];
 }
 
-// Add this interface near the top with your other interfaces
 interface ServerPromotionResponse {
     id: number;
     name: string;
@@ -139,7 +135,7 @@ interface ServerPromotionResponse {
 declare global {
     interface Window {
         debugPromotions?: () => void;
-        testPromotions?: () => Promise<void>; // Add this line
+        testPromotions?: () => Promise<void>; 
     }
 }
 
@@ -160,7 +156,6 @@ const EnhancedChocolateCartPage = () => {
     const [loading, setLoading] = useState<boolean>(true);
     const [updating, setUpdating] = useState<UpdatingState>({});
 
-    // Checkout related state
 
     const [showCheckoutForm, setShowCheckoutForm] = useState(false);
     const [savedAddresses, setSavedAddresses] = useState<SavedAddress[]>([]);
@@ -199,7 +194,6 @@ const EnhancedChocolateCartPage = () => {
 
     const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5202';
 
-    // Helper function to get user info from localStorage
     const getUserInfo = (): User | null => {
         if (typeof window !== 'undefined') {
             try {
@@ -213,7 +207,6 @@ const EnhancedChocolateCartPage = () => {
         return null;
     };
 
-    // Check authentication status
     const checkAuthStatus = (): boolean => {
         const user = getUserInfo();
         setUserInfo(user);
@@ -221,13 +214,10 @@ const EnhancedChocolateCartPage = () => {
         return !!user;
     };
 
-    // Helper function to get auth headers (updated for your cookie-based auth)
     const getAuthHeaders = async () => {
-        console.log('🔑 Getting auth headers...');
 
         let token = null;
 
-        // First try to get token from cookies (your login system uses cookies)
         if (typeof document !== 'undefined') {
             const cookies = document.cookie.split(';');
             console.log('🍪 All cookies:', cookies.map(c => c.trim()));
@@ -239,7 +229,6 @@ const EnhancedChocolateCartPage = () => {
             }
         }
 
-        // Fallback to localStorage if no cookie found
         if (!token && typeof window !== 'undefined') {
             const tokenSources = [
                 localStorage.getItem('token'),
@@ -253,31 +242,23 @@ const EnhancedChocolateCartPage = () => {
             ];
 
             token = tokenSources.find(t => t !== null);
-            console.log('🔍 Checked localStorage/sessionStorage, found:', token ? 'Yes' : 'No');
         }
 
-        console.log('🎫 Final token found:', token ? 'Yes' : 'No');
 
         const headers: Record<string, string> = {
             'Content-Type': 'application/json',
         };
 
         if (token) {
-            // Ensure Bearer prefix
             headers['Authorization'] = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
-            console.log('🔐 Authorization header set');
         } else {
-            // For guest users, ensure we have a guest session
-            console.log('👤 No auth token, ensuring guest session...');
             const guestId = await ensureGuestSession();
             headers['X-Guest-Id'] = guestId;
-            console.log('👤 Guest session header set:', guestId);
         }
 
         return headers;
     };
 
-    // Your existing helper function
     const getImageUrl = (imageUrl: string | null | undefined): string => {
         if (!imageUrl) {
             return `data:image/svg+xml,${encodeURIComponent(`
@@ -303,30 +284,20 @@ const EnhancedChocolateCartPage = () => {
         return `${API_BASE_URL}/${imageUrl.startsWith('/') ? imageUrl.slice(1) : imageUrl}`;
     };
 
-    // Your existing cart functions
     const fetchCart = async (): Promise<void> => {
         try {
-            console.log('🛒 Fetching cart with auth headers...');
             
 
             const headers = await getAuthHeaders(); // ✅ Await the headers first
-            console.log('📋 Request headers:', headers);
             const response = await fetch(`${API_BASE_URL}/api/Carts`, {
                 method: 'GET',
                 credentials: 'include',
                 headers: headers, // ✅ Then use them
             });
 
-            console.log('📡 Cart fetch response status:', response.status);
-            console.log('📡 Cart fetch response headers:', response.headers);
 
             if (response.ok) {
                 const cartData: AspNetResponse = await response.json();
-                console.log('📦 Raw cart data received:', cartData);
-                console.log('📦 Raw cart items field:', cartData.items);
-                console.log('📦 Raw cart item count:', cartData.itemCount);
-                console.log('📦 Raw cart total:', cartData.total);
-                console.log('📦 Raw cart subtotal:', cartData.subtotal);
 
                 const getItemsArray = (items: AspNetResponse['items']): CartItem[] => {
                     if (Array.isArray(items)) return items;
@@ -336,13 +307,10 @@ const EnhancedChocolateCartPage = () => {
                     return [];
                 };
 
-                console.log('All cookies:', document.cookie);
                 const guestId = document.cookie.split('; ').find(row => row.startsWith('GuestId='));
-                console.log('GuestId cookie:', guestId);
 
 
                 const itemsArray = getItemsArray(cartData.items);
-                console.log('🏷️ Processed items array:', itemsArray);
 
                 const normalizedCart: Cart = {
                     id: cartData.id || 0,
@@ -356,11 +324,8 @@ const EnhancedChocolateCartPage = () => {
                     taxAmount: cartData.tax || 0
                 };
 
-                console.log('✅ Normalized cart:', normalizedCart);
-                console.log('📊 Cart summary: Items =', normalizedCart.items.length, 'Total =', normalizedCart.totalAmount);
                 setCart(normalizedCart);
             } else if (response.status === 404) {
-                console.log('⚠️ No cart found (404), creating empty cart state');
                 setCart({
                     id: 0,
                     userId: '',
@@ -371,9 +336,7 @@ const EnhancedChocolateCartPage = () => {
                     lastModified: new Date().toISOString()
                 });
             } else {
-                console.error('❌ Failed to fetch cart:', response.status, response.statusText);
                 const errorText = await response.text();
-                console.error('❌ Error response body:', errorText);
                 setCart({
                     id: 0,
                     userId: '',
@@ -385,7 +348,6 @@ const EnhancedChocolateCartPage = () => {
                 });
             }
         } catch (fetchError) {
-            console.error('❌ Error fetching cart:', fetchError);
             setCart({
                 id: 0,
                 userId: '',
@@ -400,21 +362,18 @@ const EnhancedChocolateCartPage = () => {
         }
     };
 
-    // Your existing cart manipulation functions
     const updateQuantity = async (itemId: number, newQuantity: number): Promise<void> => {
         if (newQuantity < 1 || !cart) return;
 
         setUpdating(prev => ({ ...prev, [itemId]: true }));
 
         try {
-            console.log('🛒 Fetching cart with auth headers...');
-            const headers = await getAuthHeaders(); // ✅ Fix: await the headers
-            console.log('📋 Request headers:', headers);
+            const headers = await getAuthHeaders(); 
 
             const response = await fetch(`${API_BASE_URL}/api/Carts`, {
                 method: 'GET',
                 credentials: 'include',
-                headers: headers, // ✅ Fix: use awaited headers
+                headers: headers,
             });
 
             if (response.ok) {
@@ -435,23 +394,19 @@ const EnhancedChocolateCartPage = () => {
         setUpdating(prev => ({ ...prev, [itemId]: true }));
 
         try {
-            console.log('🛒 Fetching cart with auth headers...');
-            const headers = await getAuthHeaders(); // ✅ Fix: await the headers
-            console.log('📋 Request headers:', headers);
+            const headers = await getAuthHeaders(); 
 
             const response = await fetch(`${API_BASE_URL}/api/Carts`, {
                 method: 'GET',
                 credentials: 'include',
-                headers: headers, // ✅ Fix: use awaited headers
+                headers: headers, 
             });
 
             if (response.ok) {
                 await fetchCart();
             } else {
-                console.error('Failed to remove item:', response.statusText);
             }
         } catch (removeError) {
-            console.error('Error removing item:', removeError);
         } finally {
             setUpdating(prev => ({ ...prev, [itemId]: false }));
         }
@@ -466,7 +421,7 @@ const EnhancedChocolateCartPage = () => {
         setUpdating(prev => ({ ...prev, [itemId]: true }));
 
         try {
-            const headers = await getAuthHeaders(); // ✅ Fix: await the headers
+            const headers = await getAuthHeaders(); 
 
             const response = await fetch(`${API_BASE_URL}/api/Carts/items/${itemId}`, {
                 method: 'PUT',
@@ -483,10 +438,8 @@ const EnhancedChocolateCartPage = () => {
             if (response.ok) {
                 await fetchCart();
             } else {
-                console.error('Failed to toggle gift wrap:', response.statusText);
             }
         } catch (giftWrapError) {
-            console.error('Error toggling gift wrap:', giftWrapError);
         } finally {
             setUpdating(prev => ({ ...prev, [itemId]: false }));
         }
@@ -507,10 +460,8 @@ const EnhancedChocolateCartPage = () => {
             if (response.ok) {
                 await fetchCart();
             } else {
-                console.error('Failed to clear cart:', response.statusText);
             }
         } catch (clearError) {
-            console.error('Error clearing cart:', clearError);
         } finally {
             setLoading(false);
         }
@@ -521,39 +472,27 @@ const EnhancedChocolateCartPage = () => {
 
         try {
             setLoadingPromotions(true);
-            console.log('🔍 Fetching promotions from:', `${API_BASE_URL}/api/promotions/active`);
 
             const response = await fetch(`${API_BASE_URL}/api/promotions/active`, {
                 credentials: 'include',
                 headers: headers,
             });
 
-            console.log('📡 Promotions response status:', response.status);
 
             if (response.ok) {
                 const promotions = await response.json();
-                console.log('📢 Raw promotions from API:', promotions);
-                console.log('📢 Promotions array length:', promotions.length);
-                console.log('📢 First promotion structure:', promotions[0]);
 
-                // Handle ASP.NET Core $values format if needed
                 let processedPromotions = promotions;
                 if (promotions && typeof promotions === 'object' && '$values' in promotions) {
                     processedPromotions = promotions.$values;
-                    console.log('📢 Extracted $values:', processedPromotions);
                 }
 
                 setActivePromotions(processedPromotions);
-                console.log('✅ Set active promotions state:', processedPromotions);
-                console.log('✅ Promotions count:', processedPromotions.length);
             } else {
-                console.error('❌ Failed to fetch promotions:', response.status);
                 const errorText = await response.text();
-                console.error('❌ Error response:', errorText);
                 setActivePromotions([]);
             }
         } catch (error) {
-            console.error('❌ Error fetching promotions:', error);
             setActivePromotions([]);
         } finally {
             setLoadingPromotions(false);
@@ -571,7 +510,6 @@ const EnhancedChocolateCartPage = () => {
             setValidatingCoupon(true);
             setCouponError(null);
 
-            // Send both original order amount and current promotion discount
             const originalSubtotal = cart?.subtotalAmount || cart?.totalAmount || 0;
 
             const requestBody = {
@@ -580,11 +518,6 @@ const EnhancedChocolateCartPage = () => {
                 promotionDiscount: promotionDiscount || 0 // Current promotion discount
             };
 
-            console.log('🎫 Sending coupon validation request:', requestBody);
-            console.log('💰 Original subtotal:', originalSubtotal);
-            console.log('💰 Promotion discount:', promotionDiscount);
-            console.log('💰 Amount after promotions:', originalSubtotal - promotionDiscount);
-
             const response = await fetch(`${API_BASE_URL}/api/coupons/validate`, {
                 method: 'POST',
                 credentials: 'include',
@@ -592,11 +525,9 @@ const EnhancedChocolateCartPage = () => {
                 body: JSON.stringify(requestBody),
             });
 
-            console.log('🎫 Coupon validation response:', response.status);
 
             if (response.ok) {
                 const result = await response.json();
-                console.log('✅ Coupon validation result:', result);
 
                 if (result.isValid) {
                     // Map backend response to frontend interface
@@ -617,10 +548,8 @@ const EnhancedChocolateCartPage = () => {
                         couponCode: result.coupon?.code || code.trim().toUpperCase()
                     }));
 
-                    console.log('🎉 Coupon applied successfully!', appliedCouponData);
                 } else {
                     setCouponError(result.message || 'Invalid coupon code');
-                    console.log('❌ Coupon validation failed:', result.message);
                 }
             } else {
                 let errorMessage = 'Failed to validate coupon';
@@ -640,7 +569,6 @@ const EnhancedChocolateCartPage = () => {
         }
     };
 
-    // Remove applied coupon
     const removeCoupon = (): void => {
         setAppliedCoupon(null);
         setCheckoutFormData(prev => ({
@@ -654,12 +582,10 @@ const EnhancedChocolateCartPage = () => {
         const tax = cart?.taxAmount || (subtotal * 0.08);
         const shipping = 0; // Free shipping
 
-        // Calculate coupon discount on amount AFTER promotions (match backend)
         const subtotalAfterPromotions = Math.max(0, subtotal - promotionDiscount);
         let adjustedCouponDiscount = 0;
 
         if (appliedCoupon && appliedCoupon.coupon) {
-            // If coupon is percentage-based, recalculate on reduced amount
             if (appliedCoupon.coupon.discountType === 'Percentage') {
                 const percentage = appliedCoupon.coupon.discountAmount / 100;
                 adjustedCouponDiscount = Math.min(
@@ -667,14 +593,12 @@ const EnhancedChocolateCartPage = () => {
                     subtotalAfterPromotions
                 );
             }
-            // If fixed amount, use as-is but don't exceed remaining amount
             else if (appliedCoupon.coupon.discountType === 'FixedAmount') {
                 adjustedCouponDiscount = Math.min(
                     appliedCoupon.discountAmount,
                     subtotalAfterPromotions
                 );
             } else {
-                // Default case - use the discount amount but cap it
                 adjustedCouponDiscount = Math.min(
                     appliedCoupon.discountAmount,
                     subtotalAfterPromotions
@@ -696,26 +620,19 @@ const EnhancedChocolateCartPage = () => {
         };
     };
 
-    // New checkout functions
     const fetchSavedAddresses = async (): Promise<void> => {
         const headers = await getAuthHeaders();
         try {
-            console.log('🏠 Fetching saved addresses...');
 
-            // Use the correct endpoint that matches your controller
             const response = await fetch(`${API_BASE_URL}/api/shipping-addresses`, {
                 credentials: 'include',
                 headers: headers,
             });
 
-            console.log('📡 Address fetch response status:', response.status);
 
             if (response.ok) {
                 const addresses = await response.json();
-                console.log('📍 Fetched saved addresses:', addresses);
 
-                // Handle ASP.NET Core format - same logic as cart items
-                // Replace the getAddressesArray function with this:
                 const getAddressesArray = (addressData: unknown): SavedAddress[] => {
                     if (Array.isArray(addressData)) return addressData as SavedAddress[];
                     if (addressData && typeof addressData === 'object' && addressData !== null) {
@@ -728,36 +645,22 @@ const EnhancedChocolateCartPage = () => {
                 };
 
                 const addressArray = getAddressesArray(addresses);
-                console.log('📍 Processed addresses array:', addressArray);
-                console.log('📍 Address count:', addressArray.length);
-                console.log('📍 First address (if exists):', addressArray[0]);
-
                 setSavedAddresses(addressArray);
 
-                console.log('📍 Set saved addresses state:', addressArray);
-                console.log('📍 Saved addresses count after set:', addressArray.length);
-
-                // If user has addresses, default to saved tab
                 if (addressArray.length > 0) {
-                    console.log('📍 Setting address tab to saved');
                     setAddressTab('saved');
                 } else {
-                    console.log('📍 No addresses found, setting tab to new');
                     setAddressTab('new');
                 }
             } else if (response.status === 404) {
-                console.log('📍 No saved addresses found (404)');
                 setSavedAddresses([]);
                 setAddressTab('new'); // Default to new address form
             } else {
-                console.log('📍 Failed to fetch addresses:', response.status);
                 const errorText = await response.text();
-                console.error('Address fetch error:', errorText);
                 setSavedAddresses([]);
                 setAddressTab('new');
             }
         } catch (addressError) {
-            console.error('❌ Error fetching saved addresses:', addressError);
             setSavedAddresses([]);
             setAddressTab('new');
         }
@@ -766,27 +669,20 @@ const EnhancedChocolateCartPage = () => {
     const verifyCartBeforeCheckout = async (): Promise<boolean> => {
         const headers = await getAuthHeaders();
         try {
-            console.log('🔍 Making cart verification request...');
             const response = await fetch(`${API_BASE_URL}/api/Checkout/verify-cart`, {
                 credentials: 'include',
                 headers: headers
             });
 
-            console.log('📡 Cart verification response status:', response.status);
 
             if (response.ok) {
                 const verification = await response.json();
-                console.log('📋 Cart verification data:', verification);
 
-                // Check if cart is actually valid despite the API response
                 if (cart && cart.items && cart.items.length > 0) {
-                    console.log('🛒 Frontend cart has items, overriding API verification');
-                    console.log('📦 Cart items:', cart.items);
                     return true; // Override the API verification if frontend cart has items
                 }
 
                 const isValid = verification.CartStatus === 'Valid';
-                console.log('✅ Is cart valid?', isValid);
 
                 if (!isValid) {
                     // Show more helpful error message
@@ -812,60 +708,41 @@ const EnhancedChocolateCartPage = () => {
     };
 
     const handleStartCheckout = async (): Promise<void> => {
-        console.log('🛒 Checkout button clicked!');
         setCheckoutError(null);
 
         try {
-            console.log('🔍 Verifying cart before checkout...');
 
-            // Verify cart before showing checkout form
             const isCartValid = await verifyCartBeforeCheckout();
-            console.log('✅ Cart verification result:', isCartValid);
 
             if (!isCartValid) {
-                console.log('❌ Cart verification failed, stopping checkout');
                 return;
             }
 
-            console.log('📍 Checking if user has saved addresses...');
-            // Fetch saved addresses to check if user has any
             await fetchSavedAddresses();
 
-            // Check if user has any saved addresses
-            // If no saved addresses, just show the checkout form with new address tab
             if (savedAddresses.length === 0) {
-                console.log('📍 No saved addresses found, showing new address form');
                 setAddressTab('new');
             } else {
                 setAddressTab('saved');
             }
 
-            console.log('📢 Fetching active promotions...');
-            // Fetch active promotions
             await fetchActivePromotions();
 
-            console.log('🎯 Opening simplified checkout form...');
             setShowCheckoutForm(true);
             setCheckoutStep('address');
-            console.log('✅ Checkout form should now be visible');
         } catch (error) {
-            console.error('❌ Error in handleStartCheckout:', error);
             setCheckoutError('Failed to start checkout process');
         }
     };
 
-    // Fixed validateCheckoutForm function (add this if it's missing)
     const validateCheckoutForm = (): { isValid: boolean; errors: string[] } => {
         const errors: string[] = [];
 
-        // Make sure addressTab is properly typed
         if (addressTab === 'saved') {
-            // Validate saved address selection
             if (!checkoutFormData.savedAddressId) {
                 errors.push('Please select a shipping address');
             }
         } else if (addressTab === 'new') {
-            // Validate new address form
             if (!checkoutFormData.shippingAddress.fullName.trim()) {
                 errors.push('Full name is required');
             }
@@ -887,14 +764,8 @@ const EnhancedChocolateCartPage = () => {
     };
 
     const debugPromotions = () => {
-        console.log('🐛 DEBUG: activePromotions state:', activePromotions);
-        console.log('🐛 DEBUG: activePromotions length:', activePromotions?.length);
-        console.log('🐛 DEBUG: activePromotions type:', typeof activePromotions);
-        console.log('🐛 DEBUG: activePromotions is array?', Array.isArray(activePromotions));
 
         if (activePromotions && activePromotions.length > 0) {
-            console.log('🐛 DEBUG: First promotion:', activePromotions[0]);
-            console.log('🐛 DEBUG: First promotion properties:', Object.keys(activePromotions[0]));
         }
     };
 
@@ -908,7 +779,6 @@ const EnhancedChocolateCartPage = () => {
         const headers = await getAuthHeaders();
 
         try {
-            console.log('🎯 Calculating promotion discounts via server endpoint...');
 
             const response = await fetch(`${API_BASE_URL}/api/Checkout/calculate-cart-promotions`, {
                 method: 'POST',
@@ -918,26 +788,19 @@ const EnhancedChocolateCartPage = () => {
 
             if (response.ok) {
                 const result = await response.json();
-                console.log('🎯 Server promotion calculation result:', result);
 
-                // Update state with server calculations
                 setPromotionDiscount(result.promotionDiscount || 0);
 
-                // Handle ASP.NET Core $values format for appliedPromotions
                 let promotionsArray = result.appliedPromotions || [];
 
-                // Check if it's in ASP.NET Core $values format
                 if (promotionsArray && typeof promotionsArray === 'object' && '$values' in promotionsArray) {
                     promotionsArray = promotionsArray.$values;
                 }
 
-                // Ensure it's an array before mapping
                 if (!Array.isArray(promotionsArray)) {
-                    console.warn('⚠️ appliedPromotions is not an array:', promotionsArray);
                     promotionsArray = [];
                 }
 
-                // Map server response to frontend format with proper typing
                 const mappedPromotions = promotionsArray.map((promo: ServerPromotionResponse) => ({
                     id: promo.id,
                     name: promo.name,
@@ -950,23 +813,17 @@ const EnhancedChocolateCartPage = () => {
                 setAppliedPromotions(mappedPromotions);
 
                 if (result.promotionDiscount > 0) {
-                    console.log(`🎉 Total promotion savings from server: $${result.promotionDiscount.toFixed(2)}`);
-                    console.log('🎯 Applied promotions:', mappedPromotions);
                 } else {
-                    console.log('📭 No promotions currently applied to cart items');
                 }
             } else {
-                console.warn('⚠️ Server promotion calculation failed, falling back to client-side');
                 // Fallback to client-side calculation
                 await calculatePromotionDiscountsFallback();
             }
         } catch (error) {
-            console.error('❌ Error calculating server promotion discounts:', error);
-            // Fallback to client-side calculation
             await calculatePromotionDiscountsFallback();
         }
     };
-    // Add the missing fallback functionf
+
     const calculatePromotionDiscountsFallback = async (): Promise<void> => {
         if (!cart?.items || cart.items.length === 0) {
             setPromotionDiscount(0);
@@ -1001,7 +858,6 @@ const EnhancedChocolateCartPage = () => {
                     });
                 }
             } catch (error) {
-                console.error('Error checking promotion for product:', item.productId, error);
             }
         }
 
@@ -1009,17 +865,12 @@ const EnhancedChocolateCartPage = () => {
         setAppliedPromotions(appliedPromos);
     };
 
-    // Test if your cart items have promotions
     const testPromotions = async (): Promise<void> => {
         if (!cart?.items || cart.items.length === 0) {
-            console.log('❌ No cart or cart items available');
             return;
         }
 
-        console.log('🧪 Testing promotion integration...');
-
         for (const item of cart.items) {
-            console.log(`\n📦 Testing product: ${item.productName} (ID: ${item.productId})`);
             const headers = await getAuthHeaders();
             try {
                 const response = await fetch(`${API_BASE_URL}/api/promotions/products/${item.productId}`, {
@@ -1034,16 +885,9 @@ const EnhancedChocolateCartPage = () => {
                     const discountedPrice = originalPrice - discountAmount;
                     const totalSavings = discountAmount * item.quantity;
 
-                    console.log(`✅ HAS PROMOTION: ${promotion.name}`);
-                    console.log(`💰 Original price: ${originalPrice.toFixed(2)}`);
-                    console.log(`🎯 Discount: ${promotion.discountPercentage}% = ${discountAmount.toFixed(2)} per item`);
-                    console.log(`💸 New price: ${discountedPrice.toFixed(2)}`);
-                    console.log(`🛒 Total savings for ${item.quantity} items: ${totalSavings.toFixed(2)}`);
                 } else {
-                    console.log(`❌ No promotion found (${response.status})`);
                 }
             } catch (error) {
-                console.log(`❌ Error checking promotion:`, error);
             }
         }
     };
@@ -1058,13 +902,11 @@ const EnhancedChocolateCartPage = () => {
                 return guestId;
             }
         }
-        console.log('🔍 No GuestId cookie found');
         return null;
     };
 
     const createGuestSession = async (): Promise<string> => {
         try {
-            console.log('🔄 Creating new guest session...');
 
             const response = await fetch(`${API_BASE_URL}/api/Checkout/create-guest-session`, {
                 method: 'POST',
@@ -1074,39 +916,27 @@ const EnhancedChocolateCartPage = () => {
                 },
             });
 
-            console.log('📡 Guest session response status:', response.status);
-
             if (response.ok) {
                 const data = await response.json();
                 const guestId = data.guestId;
 
-                console.log('✅ Created guest session:', guestId);
-                console.log('🍪 Cookie should be set by server');
-
-                // Verify cookie was set
                 setTimeout(() => {
                     const verifyGuestId = getGuestId();
-                    console.log('🔍 Verification - GuestId after creation:', verifyGuestId);
                 }, 100);
 
                 return guestId;
             } else {
                 const errorText = await response.text();
-                console.error('❌ Failed to create guest session:', response.status, errorText);
                 throw new Error(`Server returned ${response.status}: ${errorText}`);
             }
         } catch (error) {
-            console.error('❌ Error creating guest session:', error);
 
-            // Fallback: generate client-side guest ID and set cookie manually
             const fallbackGuestId = `guest-${Date.now().toString().slice(-6)}_${Math.random().toString(36).substr(2, 6)}`;
 
             try {
                 document.cookie = `GuestId=${fallbackGuestId}; path=/; max-age=${7 * 24 * 60 * 60}; SameSite=Lax`;
-                console.log('🔄 Fallback: Set guest ID manually:', fallbackGuestId);
                 return fallbackGuestId;
             } catch (cookieError) {
-                console.error('❌ Failed to set fallback cookie:', cookieError);
                 return fallbackGuestId;
             }
         }
@@ -1116,10 +946,8 @@ const EnhancedChocolateCartPage = () => {
         let guestId = getGuestId();
 
         if (!guestId) {
-            console.log('🔄 No guest session found, creating new one...');
-            guestId = await createGuestSession();
+           guestId = await createGuestSession();
         } else {
-            console.log('✅ Existing guest session found:', guestId);
         }
 
         return guestId;
@@ -1227,7 +1055,6 @@ const EnhancedChocolateCartPage = () => {
                             </div>
                         </div>
                     ) : (
-                        // Coupon input - FIXED LAYOUT
                         <div className="space-y-3">
                             {/* Input and button in a proper flex container */}
                             <div className="flex gap-2 w-full">
@@ -1431,14 +1258,12 @@ const EnhancedChocolateCartPage = () => {
         };
 
         useEffect(() => {
-            // Hide confetti animation after 3 seconds
             const timer = setTimeout(() => setShowConfetti(false), 3000);
             return () => clearTimeout(timer);
         }, []);
 
         useEffect(() => {
             if (userInfo?.email && !checkoutFormData.shippingAddress.email) {
-                console.log('📧 Pre-populating email for logged-in user:', userInfo.email);
                 setCheckoutFormData(prev => ({
                     ...prev,
                     shippingAddress: {
@@ -1685,20 +1510,10 @@ const EnhancedChocolateCartPage = () => {
                 return;
             }
 
-            // Debug: Log the checkout data being sent
-            console.log('🚀 Checkout Data Being Sent:', {
-                shippingAddress: checkoutFormData.shippingAddress,
-                customerEmail: checkoutFormData.customerEmail,
-                saveAddress: checkoutFormData.saveAddress,
-                orderNotes: checkoutFormData.orderNotes
-            });
 
-            // Make sure we have an email address
             if (!checkoutFormData.shippingAddress.email && !checkoutFormData.customerEmail) {
-                console.warn('⚠️ No email address provided in checkout data');
             }
 
-            // Submit to your existing checkout controller
             const response = await fetch(`${API_BASE_URL}/api/Checkout/simple`, {
                 method: 'POST',
                 credentials: 'include',
@@ -1706,22 +1521,14 @@ const EnhancedChocolateCartPage = () => {
                 body: JSON.stringify(checkoutFormData)
             });
 
-            console.log('📡 Checkout response status:', response.status);
-
             if (response.ok) {
                 const order = await response.json();
-                console.log('✅ Order created successfully:', order);
-                console.log('📧 Order should trigger email to:',
                     checkoutFormData.shippingAddress.email || checkoutFormData.customerEmail || 'unknown');
 
-                // Go to success step after successful API call
                 setCheckoutStep('success');
 
-                // Optionally clear the cart after successful order
-                // await clearCart();
             } else {
                 const errorText = await response.text();
-                console.error('❌ Checkout failed:', errorText);
 
                 let errorMessage = 'Checkout failed';
 
@@ -1729,40 +1536,33 @@ const EnhancedChocolateCartPage = () => {
                     const errorJson = JSON.parse(errorText);
                     errorMessage = errorJson.message || errorJson.title || errorText;
                 } catch (parseError) {
-                    console.error('Error parsing response:', parseError);
                     errorMessage = errorText || 'Unknown error occurred';
                 }
 
                 setCheckoutError(errorMessage);
             }
         } catch (checkoutError) {
-            console.error('❌ Checkout error:', checkoutError);
             setCheckoutError('Network error occurred. Please try again.');
         } finally {
             setIsProcessingOrder(false);
         }
     };   
     
-    // Replace your current useEffect (around line 442) with this:
 
     useEffect(() => {
         checkAuthStatus();
         fetchCart();
         fetchActivePromotions();
 
-        // Add a timeout to debug after promotions are loaded
         setTimeout(() => {
             if (typeof window !== 'undefined') {
                 window.debugPromotions = debugPromotions;
-                window.testPromotions = testPromotions; // ✅ Now properly typed
-                console.log('🐛 Debug functions available: debugPromotions(), testPromotions()');
+                window.testPromotions = testPromotions; 
             }
         }, 2000);
     }, []);
 
-    // Add a separate useEffect to handle userInfo changes:
     useEffect(() => {
-        // Pre-populate email if user is logged in
         if (userInfo?.email) {
             setCheckoutFormData(prev => ({
                 ...prev,
@@ -1773,20 +1573,16 @@ const EnhancedChocolateCartPage = () => {
                 customerEmail: userInfo.email
             }));
         }
-    }, [userInfo]); // ✅ This is safe because it doesn't call checkAuthStatus
+    }, [userInfo]); 
 
     useEffect(() => {
-        console.log('📍 useEffect - savedAddresses changed:', savedAddresses.length);
         if (savedAddresses.length > 0) {
-            console.log('📍 useEffect - Setting tab to saved');
             setAddressTab('saved');
         } else {
-            console.log('📍 useEffect - Setting tab to new');
             setAddressTab('new');
         }
     }, [savedAddresses]);
 
-    // Your existing loading and error states
     if (loading) {
         return (
             <div className="min-h-screen flex items-center justify-center">
@@ -1813,8 +1609,6 @@ const EnhancedChocolateCartPage = () => {
             </div>
         );
     }
-
-    // Checkout Form Component
     const CheckoutForm = () => (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
             <div className="bg-[#1a1a1a] rounded-2xl border border-white/10 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
@@ -1900,7 +1694,7 @@ const EnhancedChocolateCartPage = () => {
                                             type="button"
                                             onClick={() => {
                                                 handleAddressSelect(address);
-                                                setAddressTab('new'); // Switch to "New Address" to show the form pre-filled
+                                                setAddressTab('new'); 
                                             }}
                                             className={`w-full p-3 text-left rounded-lg border transition-colors ${checkoutFormData.savedAddressId === address.id
                                                     ? 'border-[#f8c15c] bg-[#f8c15c]/10'
@@ -2313,7 +2107,6 @@ const EnhancedChocolateCartPage = () => {
                             </div>
                         </div>
 
-                            {/* Order Summary - REPLACE THE EXISTING ORDER SUMMARY SECTION */}
                             {/* Order Summary - Use the component that shows promotions */}
                             <div className="lg:col-span-1">
                                 <EnhancedOrderSummary />

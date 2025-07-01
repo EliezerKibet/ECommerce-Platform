@@ -1,5 +1,4 @@
-﻿// CustomDbContextFactory.cs
-using ECommerce.API.Data;
+﻿using ECommerce.API.Data;
 using Microsoft.EntityFrameworkCore;
 
 namespace ECommerce.API

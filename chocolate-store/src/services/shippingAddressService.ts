@@ -1,4 +1,3 @@
-// src/services/shippingAddressService.ts - Fixed to handle ASP.NET JSON format
 interface ShippingAddress {
     id?: number;
     fullName: string;
@@ -28,7 +27,6 @@ interface DebugApiResponse {
     claims: Record<string, string>;
 }
 
-// Interface to handle ASP.NET Core's JSON format with $id and $values
 interface AspNetJsonResponse<T> {
     $id?: string;
     $values?: T[];
@@ -39,7 +37,6 @@ class ShippingAddressService {
 
     constructor() {
         this.API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5202';
-        console.log('ShippingAddressService initialized with API_BASE_URL:', this.API_BASE_URL);
     }
 
     private getAuthHeaders(): Record<string, string> {
@@ -86,7 +83,6 @@ class ShippingAddressService {
             const rawData = await response.json();
             console.log('Raw API Response:', rawData);
 
-            // Extract data from ASP.NET's JSON format if needed
             const processedData = this.extractDataFromAspNetResponse<T>(rawData);
             console.log('Processed API Response:', processedData);
 
@@ -236,7 +232,6 @@ class ShippingAddressService {
         }
     }
 
-    // Debug method to test the API connection
     async debugApi(): Promise<ApiResponse<DebugApiResponse>> {
         try {
             console.log('Debug API call to:', `${this.API_BASE_URL}/api/shipping-addresses/debug`);

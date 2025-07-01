@@ -1,4 +1,3 @@
-// components/ui/tabs.tsx - Dark themed tabs component
 import React, { createContext, useContext, useState } from 'react'
 
 interface TabsContextType {

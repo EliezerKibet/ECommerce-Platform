@@ -1,6 +1,5 @@
 ﻿namespace ECommerce.API.Interfaces
 {
-    // Interfaces/ISearchService.cs
     public interface ISearchService
     {
         Task<PagedResult<ProductDto>> AdvancedSearchAsync(AdvancedSearchDto query);

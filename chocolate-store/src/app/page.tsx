@@ -1,4 +1,3 @@
-// app/page.tsx
 'use client';
 
 import Link from 'next/link';
@@ -12,7 +11,6 @@ export default function Home() {
     const { user, isAuthenticated, isLoading, logout } = useAuth();
     const [showUserMenu, setShowUserMenu] = useState(false);
 
-    // Admin shortcut
     useEffect(() => {
         let lastKeyTime = 0;
 
@@ -30,7 +28,6 @@ export default function Home() {
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, [router]);
 
-    // Close user menu when clicking outside
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (showUserMenu && !(event.target as Element).closest('.user-menu-container')) {

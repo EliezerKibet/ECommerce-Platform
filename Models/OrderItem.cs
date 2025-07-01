@@ -1,5 +1,4 @@
-﻿// Models/OrderItem.cs (Adjust if this already exists)
-namespace ECommerce.API.Models
+﻿namespace ECommerce.API.Models
 {
     public class OrderItem
     {
@@ -10,8 +9,6 @@ namespace ECommerce.API.Models
         public decimal ProductPrice { get; set; }
         public int Quantity { get; set; }
         public decimal Subtotal { get; set; }
-
-        // Navigation properties
         public Order Order { get; set; }
         public Product Product { get; set; }
     }

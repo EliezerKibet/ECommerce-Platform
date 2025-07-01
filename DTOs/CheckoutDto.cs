@@ -15,15 +15,12 @@ namespace ECommerce.API.DTOs
 
         public string? ShippingMethod { get; set; } = "standard";
 
-        // Add CustomerEmail property for order confirmation emails
         public string CustomerEmail { get; set; }
 
-        // New properties
         public int? SavedAddressId { get; set; }
         public bool SaveAddress { get; set; } = false;
     }
 
-    // DTOs/ShippingAddressDto.cs
     public class ShippingAddressDto
     {
         public int Id { get; set; }
@@ -57,15 +54,13 @@ namespace ECommerce.API.DTOs
 
         public string? UserId { get; set; }
 
-        public string? Email { get; set; } // Optional email field for shipping address
+        public string? Email { get; set; }
     }
 
     public class BillingInfoDto
     {
-        // Add a new property for payment method type
         public string PaymentMethod { get; set; } = "cod"; // Default to "cod"
 
-        // Only needed for card payments
         public string PaymentMethodId { get; set; }
     }
 }

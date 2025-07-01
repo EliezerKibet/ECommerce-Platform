@@ -43,10 +43,8 @@ export function useAdminAuth(requireAuth = true): UseAdminAuthReturn {
                 return;
             }
 
-            // Parse user data
             const parsedUser = JSON.parse(userData);
 
-            // Verify token is still valid by parsing JWT
             const base64Url = token.split('.')[1];
             const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
             const jsonPayload = decodeURIComponent(
@@ -58,15 +56,12 @@ export function useAdminAuth(requireAuth = true): UseAdminAuthReturn {
 
             const payload = JSON.parse(jsonPayload);
 
-            // Check if token is expired
             const currentTime = Math.floor(Date.now() / 1000);
             if (payload.exp && payload.exp < currentTime) {
-                // Token expired
                 logout();
                 return;
             }
 
-            // Verify user has admin privileges
             const roles = Array.isArray(payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'])
                 ? payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role']
                 : [payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role']];

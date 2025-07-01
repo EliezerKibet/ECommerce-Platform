@@ -1,5 +1,4 @@
-﻿// DTOs/CouponValidationResultDto.cs
-namespace ECommerce.API.DTOs
+﻿namespace ECommerce.API.DTOs
 {
     public class CouponValidationResultDto
     {

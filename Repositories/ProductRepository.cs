@@ -1,5 +1,4 @@
-﻿// Repositories/ProductRepository.cs
-using ECommerce.API.Data;
+﻿using ECommerce.API.Data;
 using ECommerce.API.Interfaces;
 using ECommerce.API.Models;
 using Microsoft.EntityFrameworkCore;
@@ -13,7 +12,6 @@ namespace ECommerce.API.Repositories
     {
         public ProductRepository(ApplicationDbContext context) : base(context) { }
 
-        // Override the base methods to include the Category
         public override async Task<IEnumerable<Product>> GetAllAsync()
         {
             return await _context.Products
@@ -28,7 +26,6 @@ namespace ECommerce.API.Repositories
                 .FirstOrDefaultAsync(p => p.Id == id);
         }
 
-        // Implement the product-specific methods
         public async Task<IEnumerable<Product>> GetProductsByCategoryAsync(int categoryId)
         {
             return await _context.Products

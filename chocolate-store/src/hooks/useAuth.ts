@@ -1,4 +1,3 @@
-// src/hooks/useAuth.ts - Updated to clean guest cookie on login
 import { useState, useEffect, useCallback } from 'react';
 import { parseCookies, destroyCookie, setCookie } from 'nookies';
 import { toast } from 'react-hot-toast';
@@ -42,7 +41,7 @@ export function useAuth(): AuthState & AuthActions {
     const createGuestSession = (guestId: string) => {
         try {
             setCookie(null, 'GuestId', guestId, {
-                maxAge: 30 * 24 * 60 * 60, // 30 days
+                maxAge: 30 * 24 * 60 * 60, 
                 path: '/',
                 httpOnly: false,
                 secure: process.env.NODE_ENV === 'production',
@@ -61,7 +60,6 @@ export function useAuth(): AuthState & AuthActions {
 
             console.log('Checking auth state - token exists:', !!token, 'guestId:', guestId);
 
-            // Check for authenticated user first (prioritize authentication)
             if (token && typeof window !== 'undefined') {
                 const storedUser = localStorage.getItem('user');
                 if (storedUser) {
@@ -84,7 +82,6 @@ export function useAuth(): AuthState & AuthActions {
                 }
             }
 
-            // Only use guest logic if not authenticated
             if (guestId) {
                 console.log('Using existing guest session:', guestId);
                 setAuthState({
@@ -95,7 +92,6 @@ export function useAuth(): AuthState & AuthActions {
                     guestId: guestId.startsWith('guest-') ? guestId : guestId
                 });
             } else {
-                // Create new guest session
                 const newGuestId = generateGuestId();
                 createGuestSession(newGuestId);
                 console.log('Created new guest session:', newGuestId);
@@ -133,7 +129,6 @@ export function useAuth(): AuthState & AuthActions {
         try {
             console.log('Logging in user:', user.email);
 
-            // Set authentication token
             setCookie(null, 'token', token, {
                 maxAge: 7 * 24 * 60 * 60, // 7 days
                 path: '/',
@@ -147,8 +142,6 @@ export function useAuth(): AuthState & AuthActions {
                 localStorage.setItem('user', JSON.stringify(user));
             }
 
-            // IMPORTANT: Clear guest session when user logs in
-            // This prevents confusion between guest and authenticated user
             console.log('Clearing guest session on login');
             destroyCookie(null, 'GuestId');
 
@@ -171,14 +164,12 @@ export function useAuth(): AuthState & AuthActions {
         try {
             console.log('Logging out user');
 
-            // Clear authentication data
             destroyCookie(null, 'token');
 
             if (typeof window !== 'undefined') {
                 localStorage.removeItem('user');
             }
 
-            // Create new guest session after logout
             const newGuestId = generateGuestId();
             createGuestSession(newGuestId);
             console.log('Created new guest session after logout:', newGuestId);
@@ -216,24 +207,20 @@ export function useAuth(): AuthState & AuthActions {
     }, [checkAuthState]);
 
     const getCurrentUserId = useCallback((): string => {
-        // Prioritize authenticated user (matches your backend logic)
         if (authState.isAuthenticated && authState.user) {
             console.log('Returning authenticated user ID:', authState.user.id);
             return authState.user.id;
         }
 
-        // Only use guest ID if not authenticated
         if (authState.isGuest && authState.guestId) {
             const guestIdWithPrefix = authState.guestId.startsWith('guest-') ? authState.guestId : `guest-${authState.guestId}`;
             console.log('Returning guest user ID:', guestIdWithPrefix);
             return guestIdWithPrefix;
         }
 
-        // Fallback - check cookies directly
         const cookies = parseCookies();
         const token = cookies.token;
 
-        // If we have a token, user should be authenticated
         if (token) {
             console.log('Token exists but user not in state - checking localStorage');
             if (typeof window !== 'undefined') {
@@ -250,13 +237,11 @@ export function useAuth(): AuthState & AuthActions {
             }
         }
 
-        // No authentication, use/create guest ID
         const guestId = cookies.GuestId;
         if (guestId) {
             return guestId.startsWith('guest-') ? guestId : `guest-${guestId}`;
         }
 
-        // Last resort - create new guest ID
         const newGuestId = generateGuestId();
         createGuestSession(newGuestId);
         return `guest-${newGuestId}`;

@@ -1,5 +1,4 @@
-﻿// DTOs/UpdateReviewDto.cs
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace ECommerce.API.DTOs
 {

@@ -75,14 +75,11 @@ export const categoryService = {
 
     async createCategory(formData: FormData): Promise<CategoryDto> {
         try {
-            // Convert FormData to CategoryCreateUpdateDto
             const categoryData: CategoryCreateUpdateDto = {
                 name: formData.get('name') as string,
                 description: formData.get('description') as string || undefined
-                // Removed isActive
             }
 
-            // For now, sending as JSON. You might need to send as FormData if image upload is involved
             const response = await fetch(`${API_BASE_URL}/api/admin/categories`, {
                 method: 'POST',
                 headers: getAuthHeaders(),
@@ -98,14 +95,11 @@ export const categoryService = {
 
     async updateCategory(id: number, formData: FormData): Promise<CategoryDto> {
         try {
-            // Convert FormData to CategoryCreateUpdateDto
             const categoryData: CategoryCreateUpdateDto = {
                 name: formData.get('name') as string,
                 description: formData.get('description') as string || undefined
-                // Removed isActive
             }
 
-            // For now, sending as JSON. You might need to send as FormData if image upload is involved
             const response = await fetch(`${API_BASE_URL}/api/admin/categories/${id}`, {
                 method: 'PUT',
                 headers: getAuthHeaders(),
@@ -137,7 +131,6 @@ export const categoryService = {
                     errorMessage = errorData.message || errorMessage
                     errorDetails = errorData.details || errorData
                 } catch {
-                    // Ignore parsing error
                     errorMessage = response.statusText || errorMessage
                 }
 
@@ -147,19 +140,16 @@ export const categoryService = {
                 throw error
             }
 
-            // Delete request successful (204 No Content expected)
         } catch (error) {
             console.error('Error deleting category:', error)
             throw error
         }
     },
 
-    // Additional utility method to get categories for dropdowns
     async getActiveCategoriesForDropdown(): Promise<{ id: number; name: string }[]> {
         try {
             const categories = await this.getAllCategories()
             return categories
-                // Removed isActive filter
                 .map(cat => ({ id: cat.id, name: cat.name }))
                 .sort((a, b) => a.name.localeCompare(b.name))
         } catch (error) {

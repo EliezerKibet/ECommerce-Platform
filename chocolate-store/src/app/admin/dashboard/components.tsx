@@ -149,17 +149,13 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
     onAction
 }) => (
     <div className="text-center py-16 bg-gray-900/60 backdrop-blur-sm rounded-lg border border-gray-700/50">
-        {/* This is the problematic part - fix the icon rendering */}
         {React.isValidElement(icon) ? (
-            // If it's already a React element (JSX), render it directly
             <div className="mb-4 flex justify-center">{icon}</div>
         ) : typeof icon === 'function' ? (
-            // If it's a component function, render it as JSX
             React.createElement(icon as React.ComponentType<{ className?: string }>, {
                 className: "h-16 w-16 text-gray-600 mx-auto mb-4"
             })
         ) : (
-            // For any other case, try to render as-is
             <div className="mb-4 flex justify-center">{icon}</div>
         )}
         <div className="text-xl font-semibold text-gray-400 mb-2">{title}</div>

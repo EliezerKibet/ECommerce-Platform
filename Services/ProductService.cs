@@ -1,5 +1,4 @@
-﻿// Services/ProductService.cs
-using AutoMapper;
+﻿using AutoMapper;
 using ECommerce.API.Data;
 using ECommerce.API.DTOs;
 using ECommerce.API.Interfaces;

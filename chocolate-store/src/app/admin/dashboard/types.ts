@@ -1,23 +1,14 @@
-﻿// Type definitions for the admin dashboard
-
-// =============================================================================
-// BACKEND RESPONSE UTILITIES
-// =============================================================================
-
-// Generic type for backend responses that come with $values wrapper
-export interface BackendArrayResponse<T> {
+﻿export interface BackendArrayResponse<T> {
     $id: string;
     $values: T[];
 }
 
-// Type for daily sales data
 export interface DailySalesData {
     date: string;
     revenue: number;
     orders: number;
 }
 
-// Utility function to normalize backend array responses
 export function normalizeBackendArray<T>(data: T[] | BackendArrayResponse<T> | null | undefined): T[] {
     if (!data) return [];
 
@@ -32,7 +23,6 @@ export function normalizeBackendArray<T>(data: T[] | BackendArrayResponse<T> | n
     return [];
 }
 
-// Specific normalizers for different data types
 export function normalizeDailyData(dailyData: DailySalesData[] | BackendArrayResponse<DailySalesData> | null | undefined): DailySalesData[] {
     return normalizeBackendArray(dailyData);
 }
@@ -57,9 +47,6 @@ export function normalizePromotions(promotions: PromotionDto[] | BackendArrayRes
     return normalizeBackendArray(promotions);
 }
 
-// =============================================================================
-// MAIN DATA TYPES
-// =============================================================================
 
 export interface SalesSummaryDto {
     totalRevenue: number;
@@ -76,11 +63,8 @@ export interface SalesSummaryDto {
         method2Count?: number;
         adminUsernames?: string[];
     };
-    // Updated to handle both formats
     dailyData?: DailySalesData[] | BackendArrayResponse<DailySalesData> | null;
 }
-
-// Updated CategoryDto without isActive
 export interface CategoryDto {
     isActive: any;
     id: number;
@@ -92,7 +76,6 @@ export interface CategoryDto {
     seoDescription?: string;
     createdAt?: string;
     updatedAt?: string;
-    // Optional fields for statistics (if your API provides them)
     productCount?: number;
     totalSales?: number;
 }
@@ -100,7 +83,7 @@ export interface CategoryDto {
 export interface CategoryCreateUpdateDto {
     name: string;
     description?: string;
-    image?: File; // For image upload
+    image?: File; 
     slug?: string;
     seoTitle?: string;
     seoDescription?: string;
@@ -184,7 +167,6 @@ export interface ProductDto {
     updatedAt: string;
     weightInGrams: number;
 
-    // Chocolate-specific fields
     cocoaPercentage?: string | null;
     origin?: string | null;
     flavorNotes?: string | null;
@@ -223,7 +205,6 @@ export interface CouponDto {
     isActive: boolean;
 }
 
-// Updated PromotionDto to handle backend response format
 export interface PromotionDto {
     id: number;
     name: string;
@@ -236,7 +217,6 @@ export interface PromotionDto {
     type?: number;
     colorScheme?: string;
     timeRemaining?: number;
-    // Updated to handle both formats
     products?: ProductDto[] | BackendArrayResponse<ProductDto>;
 }
 
@@ -247,8 +227,8 @@ export interface CreateUpdatePromotionDto {
     startDate: string;
     endDate: string;
     isActive: boolean;
-    bannerImageUrl: string; // Will be set from uploaded image
-    type: number; // Changed from string to number
+    bannerImageUrl: string; 
+    type: number; 
     colorScheme: string;
     productIds: number[];
 }
@@ -298,7 +278,6 @@ export interface ProductFormData {
     weightInGrams: number;
     image: File | null;
 
-    // Optional chocolate-specific fields
     cocoaPercentage?: string | number | null;
     origin?: string | null;
     flavorNotes?: string | null;
@@ -309,9 +288,6 @@ export interface ProductFormData {
     isVisible: boolean;
 }
 
-// =============================================================================
-// ASP.NET CORE SERIALIZATION TYPES (keeping your existing ones)
-// =============================================================================
 
 export type AspNetValueResponse<T> = {
     $id?: string;
@@ -351,11 +327,6 @@ export type AspNetOrder = {
     shippingMethod?: string;
     orderItems?: AspNetValueResponse<AspNetOrderItem> | AspNetOrderItem[];
 };
-
-// =============================================================================
-// TYPE GUARDS (helpful for runtime type checking)
-// =============================================================================
-
 export function isBackendArrayResponse<T>(data: unknown): data is BackendArrayResponse<T> {
     return (
         typeof data === 'object' &&
@@ -373,10 +344,6 @@ export function hasValidDailyData(summary: SalesSummaryDto): boolean {
     return isBackendArrayResponse(summary.dailyData);
 }
 
-// =============================================================================
-// PROMOTION PAYLOAD TYPE (for forms)
-// =============================================================================
-
 export type PromotionPayload = {
     name: string;
     description: string;
@@ -387,5 +354,5 @@ export type PromotionPayload = {
     colorScheme: string;
     type: number;
     productIds: number[];
-    bannerImageUrl: string; // This will be populated from uploaded image
+    bannerImageUrl: string; 
 };

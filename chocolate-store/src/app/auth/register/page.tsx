@@ -21,7 +21,6 @@ export default function RegisterPage() {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-    // Check if user is already logged in
     useEffect(() => {
         const cookies = parseCookies();
         if (cookies.token) {
@@ -33,7 +32,6 @@ export default function RegisterPage() {
         const { name, value } = e.target;
         setFormData((prev) => ({ ...prev, [name]: value }));
 
-        // Clear error when user starts typing
         if (error) {
             setError('');
         }
@@ -43,7 +41,6 @@ export default function RegisterPage() {
         e.preventDefault();
         setError('');
 
-        // Client-side validation
         if (formData.password !== formData.confirmPassword) {
             setError('Passwords do not match');
             return;
@@ -62,7 +59,6 @@ export default function RegisterPage() {
         setLoading(true);
 
         try {
-            // Your existing service expects this format
             const registrationData = {
                 email: formData.email.trim(),
                 password: formData.password,
@@ -71,29 +67,14 @@ export default function RegisterPage() {
                 lastName: formData.lastName.trim()
             };
 
-            console.log('=== REGISTRATION DEBUG INFO ===');
-            console.log('Form data being sent:', {
-                email: registrationData.email,
-                firstName: registrationData.firstName,
-                lastName: registrationData.lastName,
-                passwordLength: registrationData.password?.length || 0,
-                confirmPasswordLength: registrationData.confirmPassword?.length || 0,
-                emailValid: /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(registrationData.email),
-                passwordsMatch: registrationData.password === registrationData.confirmPassword,
-                allFieldsPresent: !!(registrationData.email && registrationData.firstName && registrationData.lastName && registrationData.password && registrationData.confirmPassword)
-            });
-            console.log('=== END DEBUG INFO ===');
 
             await register(registrationData);
             toast.success('Registration successful! Please check your email to confirm your account.');
             router.push('/auth/login');
         } catch (error: unknown) {
-            console.error('=== REGISTRATION ERROR ===');
-            console.error('Full error object:', error);
 
             let errorMessage = 'Registration failed. Please try again.';
 
-            // Type-safe error handling without any 'any' types
             if (error && typeof error === 'object' && 'response' in error) {
                 const axiosError = error as {
                     response?: {

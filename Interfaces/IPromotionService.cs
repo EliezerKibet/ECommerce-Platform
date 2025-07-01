@@ -10,8 +10,6 @@
         Task<bool> DeletePromotionAsync(int id);
         Task<List<PromotionProductDto>> GetPromotionProductsAsync(int promotionId);
         Task<PromotionDto> GetProductPromotionAsync(int productId);
-        // Add to IPromotionService.cs
-        // Add to IPromotionService.cs
         Task<PromotionDto> AddProductToPromotionAsync(int promotionId, int productId);
         Task<PromotionDto> RemoveProductFromPromotionAsync(int promotionId, int productId);
     }

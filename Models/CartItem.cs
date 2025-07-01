@@ -1,5 +1,4 @@
-﻿// Models/CartItem.cs
-namespace ECommerce.API.Models
+﻿namespace ECommerce.API.Models
 {
     public class CartItem
     {
@@ -9,11 +8,9 @@ namespace ECommerce.API.Models
         public int Quantity { get; set; }
         public DateTime AddedAt { get; set; } = DateTime.UtcNow;
 
-        // Navigation properties
         public Cart Cart { get; set; }
         public Product Product { get; set; }
 
-        // Chocolate-specific options
         public bool IsGiftWrapped { get; set; }
         public string GiftMessage { get; set; }
     }

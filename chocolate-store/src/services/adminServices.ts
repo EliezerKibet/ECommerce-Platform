@@ -1,8 +1,6 @@
-// Enhanced adminServices.ts with better error handling and fallback support
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5202';
 
-// Helper function to get auth headers
 function getAuthHeaders() {
     const token = localStorage.getItem('adminToken');
     return {
@@ -11,7 +9,6 @@ function getAuthHeaders() {
     };
 }
 
-// Enhanced helper function to handle API responses with better error details
 async function handleApiResponse(response: Response) {
     console.log('Response status:', response.status);
     console.log('Response URL:', response.url);
@@ -26,8 +23,6 @@ async function handleApiResponse(response: Response) {
             errorMessage = errorData.message || errorData.error || errorData.title || errorMessage;
             errorDetails = errorData;
         } catch {
-            console.log('Could not parse error response, using default message');
-            // Try to get text response for more details
             try {
                 const textResponse = await response.text();
                 console.log('Error response text:', textResponse);
@@ -35,7 +30,6 @@ async function handleApiResponse(response: Response) {
                     errorDetails = { rawResponse: textResponse };
                 }
             } catch {
-                // Ignore if we can't get text either
             }
         }
 
@@ -46,9 +40,7 @@ async function handleApiResponse(response: Response) {
     }
 
     const data = await response.json();
-    console.log('Success response data:', data);
 
-    // Handle ASP.NET Core's JSON serialization format with $id and $values
     if (data && typeof data === 'object' && '$values' in data) {
         return data.$values;
     }
@@ -56,13 +48,11 @@ async function handleApiResponse(response: Response) {
     return data;
 }
 
-// Extended Error interface for better error handling
 interface ExtendedError extends Error {
     details?: Record<string, unknown> | null;
     status?: number;
 }
 
-// Type definitions (keeping existing ones)
 export interface ProductDto {
     id: number;
     name: string;
@@ -122,7 +112,6 @@ export interface PromotionProductDto {
     discountedPrice: number;
 }
 
-// Enhanced interface for sales summary with better error handling
 export interface SalesSummaryDto {
     totalRevenue: number;
     totalOrders: number;
@@ -140,7 +129,6 @@ export interface SalesSummaryDto {
     };
 }
 
-// Fallback interface for customer count only
 export interface CustomerCountFallback {
     totalCustomers: number;
     totalUsers: number;
@@ -148,9 +136,7 @@ export interface CustomerCountFallback {
     lastUpdated: string;
 }
 
-// Enhanced analytics service with fallback mechanisms
 export const adminAnalyticsService = {
-    // Sales Analytics with fallback to customer count only
     getSalesSummary: async (startDate?: string, endDate?: string): Promise<SalesSummaryDto> => {
         const params = new URLSearchParams();
         if (startDate) params.append('startDate', startDate);
@@ -164,12 +150,9 @@ export const adminAnalyticsService = {
         } catch (error) {
             console.error('Sales summary failed, attempting fallback to customer count:', error);
 
-            // Fallback 1: Try to get customer count only
             try {
                 const customerData = await adminAnalyticsService.getTotalCustomers();
-                console.log('Fallback customer data:', customerData);
 
-                // Return a minimal sales summary with real customer count
                 return {
                     totalRevenue: 0,
                     totalOrders: 0,
@@ -186,7 +169,6 @@ export const adminAnalyticsService = {
             } catch (fallbackError) {
                 console.error('Customer count fallback also failed:', fallbackError);
 
-                // Fallback 2: Return empty data but don't throw
                 return {
                     totalRevenue: 0,
                     totalOrders: 0,
@@ -199,7 +181,6 @@ export const adminAnalyticsService = {
         }
     },
 
-    // Customer count endpoints with enhanced error handling
     getTotalCustomers: async (): Promise<CustomerCountFallback> => {
         try {
             const response = await fetch(`${API_BASE_URL}/api/admin/analytics/customers/total`, {
@@ -212,7 +193,6 @@ export const adminAnalyticsService = {
         }
     },
 
-    // Alternative customer count with verification
     verifyCustomerCount: async (): Promise<{
         method1_UserManager: number;
         method2_DirectQuery: number;
@@ -231,7 +211,6 @@ export const adminAnalyticsService = {
         return handleApiResponse(response);
     },
 
-    // Debug endpoint for troubleshooting
     getDebugCounts: async (): Promise<{
         productCount: number;
         categoryCount: number;
@@ -252,10 +231,8 @@ export const adminAnalyticsService = {
         return handleApiResponse(response);
     },
 
-    // Health check endpoint to test basic connectivity
     healthCheck: async (): Promise<{ status: string; timestamp: string }> => {
         try {
-            // Try to hit any working endpoint to test connectivity
             const response = await fetch(`${API_BASE_URL}/api/admin/debug/counts`, {
                 headers: getAuthHeaders()
             });
@@ -279,7 +256,6 @@ export const adminAnalyticsService = {
         }
     },
 
-    // Other analytics methods (keeping existing implementations)
     getSalesByProduct: async (startDate?: string, endDate?: string) => {
         const params = new URLSearchParams();
         if (startDate) params.append('startDate', startDate);
@@ -303,7 +279,6 @@ export const adminAnalyticsService = {
     }
 };
 
-// Admin service (keeping existing implementation but with enhanced error handling)
 export const adminService = {
     getProducts: async (): Promise<ProductDto[]> => {
         const response = await fetch(`${API_BASE_URL}/api/admin/products`, {

@@ -1,5 +1,4 @@
-﻿// Repositories/Repository.cs
-using ECommerce.API.Data;
+﻿using ECommerce.API.Data;
 using ECommerce.API.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;

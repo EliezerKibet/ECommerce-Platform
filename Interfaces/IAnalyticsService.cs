@@ -1,6 +1,5 @@
 ﻿namespace ECommerce.API.Interfaces
 {
-    // Interfaces/IAnalyticsService.cs
     public interface IAnalyticsService
     {
         Task<object> GetSalesSummaryAsync(DateTime? startDate = null, DateTime? endDate = null);
@@ -16,8 +15,6 @@
         Task<object> GetInventoryStatusAsync();
         Task<object> GetLowStockProductsAsync(int threshold = 10);
         Task<object> GetDashboardDataAsync();
-
-        // New method for all-time sales
         Task<object> GetAllTimeSalesAsync();
         Task<object> GetAllSalesOrdersAsync(int page = 1, int pageSize = 50);
     }

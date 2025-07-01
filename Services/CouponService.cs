@@ -1,5 +1,4 @@
-﻿// Services/CouponService.cs
-using ECommerce.API.Data;
+﻿using ECommerce.API.Data;
 using ECommerce.API.DTOs;
 using ECommerce.API.Interfaces;
 using ECommerce.API.Models;
@@ -143,7 +142,6 @@ namespace ECommerce.API.Services
             return true;
         }
 
-        // Update your CouponService.ValidateCouponAsync method to match your simplified DTO:
 
         public async Task<CouponValidationResultDto> ValidateCouponAsync(ValidateCouponDto dto)
         {
@@ -223,8 +221,6 @@ namespace ECommerce.API.Services
                 };
             }
 
-            // 🔧 KEY FIX: Check minimum order amount against ORIGINAL order amount (before promotions)
-            // This is the standard e-commerce practice - promotions shouldn't disqualify customers from coupons
             if (dto.OrderAmount < coupon.MinimumOrderAmount)
             {
                 _logger.LogWarning("[{RequestId}] Order amount ${OrderAmount} is below minimum ${MinimumOrderAmount} for coupon {Code}",
@@ -239,7 +235,6 @@ namespace ECommerce.API.Services
             }
 
 
-            // 🔧 KEY FIX: Calculate discount based on amount AFTER promotions
             decimal amountForDiscount = Math.Max(0, dto.OrderAmount - dto.PromotionDiscount);
             decimal discountAmount = 0;
 
@@ -249,7 +244,7 @@ namespace ECommerce.API.Services
                 _logger.LogInformation("[{RequestId}] Percentage discount calculation: {AmountForDiscount} * {DiscountPercentage}% = ${DiscountAmount}",
                     requestId, amountForDiscount, coupon.DiscountAmount, discountAmount);
             }
-            else // FixedAmount
+            else
             {
                 discountAmount = Math.Min(coupon.DiscountAmount, amountForDiscount);
                 _logger.LogInformation("[{RequestId}] Fixed discount calculation: Min({FixedAmount}, {AmountForDiscount}) = ${DiscountAmount}",

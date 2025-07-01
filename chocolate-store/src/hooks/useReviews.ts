@@ -1,5 +1,4 @@
-﻿// src/hooks/useReviews.ts
-import { useState, useCallback, useRef } from 'react';
+﻿import { useState, useCallback, useRef } from 'react';
 
 interface ReviewDto {
     id: number;
@@ -26,12 +25,10 @@ export const useReviews = () => {
     const [loading, setLoading] = useState(false);
     const [submitting, setSubmitting] = useState(false);
 
-    // Track which products we've already checked to avoid duplicates
     const checkedProducts = useRef(new Set<number>());
 
     const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5202';
 
-    // Get auth headers - optimized version
     const getAuthHeaders = useCallback((): Record<string, string> => {
         const headers: Record<string, string> = {
             'Content-Type': 'application/json',
@@ -51,7 +48,6 @@ export const useReviews = () => {
         return headers;
     }, []);
 
-    // Check if user is authenticated
     const isAuthenticated = useCallback(() => {
         if (typeof document !== 'undefined') {
             const tokenCookie = document.cookie
@@ -62,17 +58,14 @@ export const useReviews = () => {
         return false;
     }, []);
 
-    // Get user's review for a specific product (single API call)
     const getUserReview = useCallback(async (productId: number): Promise<ReviewDto | null> => {
         if (!isAuthenticated()) return null;
 
-        // Don't check the same product multiple times
-        if (checkedProducts.current.has(productId)) {
+       if (checkedProducts.current.has(productId)) {
             return userReviews[productId] || null;
         }
 
         try {
-            console.log(`🔍 Checking user review for product ${productId}`);
 
             const response = await fetch(`${API_BASE_URL}/api/products/${productId}/reviews/user`, {
                 headers: getAuthHeaders()
@@ -82,7 +75,6 @@ export const useReviews = () => {
 
             if (response.ok) {
                 const review = await response.json();
-                console.log(`✅ Found user review for product ${productId}: rating ${review.rating}`);
 
                 setUserReviews(prev => ({
                     ...prev,
@@ -91,11 +83,9 @@ export const useReviews = () => {
 
                 return review;
             } else if (response.status === 404) {
-                console.log(`❌ No user review found for product ${productId}`);
                 return null;
             } else {
-                console.error(`Error fetching user review for product ${productId}:`, response.status);
-                return null;
+               return null;
             }
         } catch (error) {
             console.error(`Error fetching user review for product ${productId}:`, error);
@@ -103,11 +93,9 @@ export const useReviews = () => {
         }
     }, [isAuthenticated, userReviews, getAuthHeaders, API_BASE_URL]);
 
-    // Batch check user reviews for multiple products (optimized)
     const checkUserReviews = useCallback(async (productIds: number[]) => {
         if (!isAuthenticated() || productIds.length === 0) return;
 
-        // Filter out products we've already checked
         const uncheckedProducts = productIds.filter(id => !checkedProducts.current.has(id));
 
         if (uncheckedProducts.length === 0) {
@@ -119,7 +107,6 @@ export const useReviews = () => {
         console.log('🔍 Checking user reviews for unchecked products:', uncheckedProducts);
 
         try {
-            // Limit concurrent requests to avoid overwhelming the server
             const batchSize = 5;
             const batches = [];
 
@@ -131,13 +118,11 @@ export const useReviews = () => {
                 const promises = batch.map(productId => getUserReview(productId));
                 await Promise.allSettled(promises);
 
-                // Small delay between batches to be nice to the server
                 if (batches.length > 1) {
                     await new Promise(resolve => setTimeout(resolve, 100));
                 }
             }
 
-            console.log(`📋 Completed checking ${uncheckedProducts.length} products`);
         } catch (error) {
             console.error('Error checking user reviews:', error);
         } finally {
@@ -145,8 +130,7 @@ export const useReviews = () => {
         }
     }, [isAuthenticated, getUserReview]);
 
-    // Submit or update a review
-    const submitReview = useCallback(async (
+   const submitReview = useCallback(async (
         productId: number,
         reviewData: ReviewForm,
         existingReviewId?: number
@@ -161,7 +145,6 @@ export const useReviews = () => {
 
         const method = existingReviewId ? 'PUT' : 'POST';
 
-        console.log(`📝 ${method === 'POST' ? 'Creating' : 'Updating'} review for product ${productId}`);
 
         setSubmitting(true);
         try {
@@ -173,9 +156,7 @@ export const useReviews = () => {
 
             if (response.ok) {
                 const review = await response.json();
-                console.log(`✅ Review ${method === 'POST' ? 'created' : 'updated'} successfully:`, review.id);
 
-                // Update local state
                 setUserReviews(prev => ({
                     ...prev,
                     [productId]: review
@@ -195,7 +176,6 @@ export const useReviews = () => {
         }
     }, [isAuthenticated, getAuthHeaders, API_BASE_URL]);
 
-    // Get all reviews for a product (public endpoint)
     const getProductReviews = useCallback(async (productId: number): Promise<ReviewDto[]> => {
         try {
             const response = await fetch(`${API_BASE_URL}/api/products/${productId}/reviews`, {
@@ -215,7 +195,6 @@ export const useReviews = () => {
         }
     }, [API_BASE_URL]);
 
-    // Clear cache for a specific product (useful after updates)
     const clearProductCache = useCallback((productId: number) => {
         checkedProducts.current.delete(productId);
         setUserReviews(prev => {

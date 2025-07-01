@@ -1,5 +1,4 @@
-﻿// Data/DataSeeder.cs
-using ECommerce.API.Data;
+﻿using ECommerce.API.Data;
 using ECommerce.API.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -12,10 +11,8 @@ public static class DataSeeder
 {
     public static async Task SeedData(ApplicationDbContext context, RoleManager<IdentityRole> roleManager, UserManager<ApplicationUser> userManager)
     {
-        // Ensure database is created
         context.Database.EnsureCreated();
 
-        // Seed Categories
         if (!context.Categories.Any())
         {
             var categories = new List<Category>
@@ -30,7 +27,6 @@ public static class DataSeeder
             await context.SaveChangesAsync();
         }
 
-        // Seed Products if none exist
         if (!context.Products.Any())
         {
             var categories = await context.Categories.ToListAsync();
@@ -42,7 +38,6 @@ public static class DataSeeder
 
             var products = new List<Product>
             {
-                // Dark Chocolate Products
                 new Product
                 {
                     Name = "Intense Dark Espresso",
@@ -95,7 +90,6 @@ public static class DataSeeder
                     AllergenInfo = "May contain traces of nuts, milk"
                 },
                 
-                // Milk Chocolate Products
                 new Product
                 {
                     Name = "Creamy Milk Classic",
@@ -312,14 +306,12 @@ public static class DataSeeder
             await context.SaveChangesAsync();
         }
 
-        // You can also seed roles
         if (!roleManager.Roles.Any())
         {
             await roleManager.CreateAsync(new IdentityRole("Admin"));
             await roleManager.CreateAsync(new IdentityRole("Customer"));
         }
 
-        // And seed admin user
         if (!userManager.Users.Any())
         {
             var adminUser = new ApplicationUser
@@ -334,7 +326,6 @@ public static class DataSeeder
             await userManager.AddToRoleAsync(adminUser, "Admin");
         }
 
-        // Seed customer users
         if (await userManager.FindByEmailAsync("customer@example.com") == null)
         {
             var customerUser = new ApplicationUser

@@ -1,5 +1,4 @@
-﻿// === UPDATED LOGIN PAGE (src/app/auth/login/page.tsx) ===
-'use client';
+﻿'use client';
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
@@ -16,7 +15,6 @@ export default function LoginPage() {
     const [showPassword, setShowPassword] = useState(false);
     const [resendingConfirmation, setResendingConfirmation] = useState(false);
 
-    // Check if user is already logged in
     useEffect(() => {
         const cookies = parseCookies();
         if (cookies.token) {
@@ -24,7 +22,6 @@ export default function LoginPage() {
         }
     }, [router]);
 
-    // Function to handle resending email confirmation
     const handleResendConfirmation = async () => {
         if (!email) {
             toast.error('Please enter your email address first.');
@@ -77,13 +74,10 @@ export default function LoginPage() {
                 }),
             });
 
-            console.log('Login response status:', response.status);
 
             if (response.ok) {
                 const data = await response.json();
-                console.log('Login successful:', { user: data.user, hasToken: !!data.token });
 
-                // Store token in cookies with proper security settings
                 setCookie(null, 'token', data.token, {
                     maxAge: 7 * 24 * 60 * 60, // 7 days (matches JWT expiry)
                     path: '/',
@@ -91,19 +85,16 @@ export default function LoginPage() {
                     sameSite: 'strict'
                 });
 
-                // Store user data in localStorage for easy access
                 if (typeof window !== 'undefined') {
                     localStorage.setItem('user', JSON.stringify(data.user));
                 }
 
                 toast.success(`Welcome back, ${data.user.firstName}!`);
 
-                // Redirect to home page
                 router.push('/');
                 router.refresh();
             } else {
                 const errorData = await response.json();
-                console.log('Login error response:', errorData);
 
                 if (errorData.requiresEmailConfirmation) {
                     setError('Please confirm your email before logging in. Check your inbox for the confirmation link.');
@@ -114,7 +105,6 @@ export default function LoginPage() {
                 }
             }
         } catch (error) {
-            console.error('Login error:', error);
             setError('Network error. Please check your connection and try again.');
             toast.error('Connection error. Please try again.');
         } finally {

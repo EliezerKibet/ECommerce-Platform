@@ -1,5 +1,4 @@
-﻿// ViewModels/AuthViewModels.cs
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace ECommerce.API.ViewModels
 {

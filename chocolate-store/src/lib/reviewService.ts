@@ -1,4 +1,3 @@
-// lib/reviewService.ts
 import api from './api';
 
 export interface Review {
@@ -31,7 +30,6 @@ export interface ProductRatingsSummaryDto {
 export class ReviewService {
     private static API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5202';
 
-    // Get reviews for a product
     static async getProductReviews(productId: number, page = 1, pageSize = 10): Promise<Review[]> {
         try {
             const response = await api.get(`/api/products/${productId}/reviews`, {
@@ -44,7 +42,6 @@ export class ReviewService {
         }
     }
 
-    // Get product rating summary
     static async getProductRatingsSummary(productId: number): Promise<ProductRatingsSummaryDto> {
         try {
             const response = await api.get(`/api/products/${productId}/reviews/summary`);
@@ -55,7 +52,6 @@ export class ReviewService {
         }
     }
 
-    // Create a new review
     static async createReview(productId: number, reviewData: CreateReviewDto): Promise<Review> {
         try {
             const response = await api.post(`/api/products/${productId}/reviews`, reviewData);
@@ -66,7 +62,6 @@ export class ReviewService {
         }
     }
 
-    // Update an existing review
     static async updateReview(productId: number, reviewId: number, reviewData: UpdateReviewDto): Promise<Review> {
         try {
             const response = await api.put(`/api/products/${productId}/reviews/${reviewId}`, reviewData);
@@ -77,7 +72,6 @@ export class ReviewService {
         }
     }
 
-    // Delete a review
     static async deleteReview(productId: number, reviewId: number): Promise<void> {
         try {
             await api.delete(`/api/products/${productId}/reviews/${reviewId}`);
@@ -87,7 +81,6 @@ export class ReviewService {
         }
     }
 
-    // Get a specific review
     static async getReview(productId: number, reviewId: number): Promise<Review> {
         try {
             const response = await api.get(`/api/products/${productId}/reviews/${reviewId}`);
@@ -98,11 +91,8 @@ export class ReviewService {
         }
     }
 
-    // Check if current user has purchased the product and can review it
     static async canUserReview(): Promise<boolean> {
         try {
-            // This would need to be implemented based on your order system
-            // For now, we'll assume users can review if they're logged in or have a guest session
             const token = document.cookie.split('; ').find(row => row.startsWith('token='));
             const guestId = document.cookie.split('; ').find(row => row.startsWith('GuestId='));
 
@@ -113,7 +103,6 @@ export class ReviewService {
         }
     }
 
-    // Get current user's review for a product (if any)
     static async getUserReviewForProduct(productId: number): Promise<Review | null> {
         try {
             const reviews = await this.getProductReviews(productId);
@@ -128,17 +117,14 @@ export class ReviewService {
         }
     }
 
-    // Helper to get current user ID
     private static getCurrentUserId(): string | null {
         try {
-            // Try to get from localStorage first (authenticated users)
             const user = localStorage.getItem('user');
             if (user) {
                 const userData = JSON.parse(user);
                 return userData.id;
             }
 
-            // Try to get guest ID from cookie
             const guestIdCookie = document.cookie.split('; ').find(row => row.startsWith('GuestId='));
             if (guestIdCookie) {
                 const guestId = guestIdCookie.split('=')[1];

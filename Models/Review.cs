@@ -1,5 +1,4 @@
-﻿// Models/Review.cs
-using System;
+﻿using System;
 
 namespace ECommerce.API.Models
 {
@@ -9,7 +8,7 @@ namespace ECommerce.API.Models
         public int ProductId { get; set; }
         public string UserId { get; set; }
         public string UserName { get; set; }
-        public int Rating { get; set; }  // 1-5 stars
+        public int Rating { get; set; } 
         public string Title { get; set; }
         public string Comment { get; set; }
         public bool IsVerifiedPurchase { get; set; }

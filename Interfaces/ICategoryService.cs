@@ -1,5 +1,4 @@
-﻿// Interfaces/ICategoryService.cs
-using ECommerce.API.DTOs;
+﻿using ECommerce.API.DTOs;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 

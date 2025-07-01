@@ -1,5 +1,4 @@
-﻿// Enhanced ProductForm and ProductList with improved image handling
-
+﻿
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -11,7 +10,7 @@ interface ProductFormProps {
     isOpen: boolean;
     onClose: () => void;
     editingProduct: ProductDto | null;
-    categories: CategoryDto[]; // Changed from CategoryWithStatus
+    categories: CategoryDto[]; 
     onSubmit: (formData: FormData, isEdit: boolean, productId?: number) => Promise<void>;
     loading: boolean;
 }
@@ -24,7 +23,6 @@ export const ProductForm: React.FC<ProductFormProps> = ({
     onSubmit,
     loading
 }) => {
-    // Form state
     const [formData, setFormData] = useState<ProductFormData>({
         name: '',
         description: '',
@@ -40,24 +38,22 @@ export const ProductForm: React.FC<ProductFormProps> = ({
         isFairTrade: false,
         ingredients: null,
         allergenInfo: null,
-        isVisible: true // Default to true
+        isVisible: true 
     });
 
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
 
-    // Reset form when opening/closing or when editingProduct changes
     useEffect(() => {
         if (isOpen) {
             if (editingProduct) {
-                // Populate form with existing product data
                 setFormData({
                     name: editingProduct.name || '',
                     description: editingProduct.description || '',
                     price: editingProduct.price || 0,
                     stockQuantity: editingProduct.stockQuantity || 0,
                     categoryId: editingProduct.categoryId || 0,
-                    image: null, // Always start with null for image
+                    image: null, 
                     weightInGrams: editingProduct.weightInGrams || 0,
                     cocoaPercentage: editingProduct.cocoaPercentage || '',
                     origin: editingProduct.origin || null,
@@ -68,10 +64,8 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                     allergenInfo: editingProduct.allergenInfo || null,
                     isVisible: editingProduct.isVisible ?? true
                 });
-                // Set image preview using the existing image URL
                 setImagePreview(editingProduct.imageUrl ? getImageUrl(editingProduct.imageUrl) : null);
             } else {
-                // Reset form for new product
                 resetForm();
             }
         }
@@ -93,7 +87,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
             isFairTrade: false,
             ingredients: null,
             allergenInfo: null,
-            isVisible: true // Default to true
+            isVisible: true 
         });
         setImagePreview(null);
     };
@@ -110,7 +104,6 @@ export const ProductForm: React.FC<ProductFormProps> = ({
             const file = (e.target as HTMLInputElement).files?.[0] || null;
             setFormData(prev => ({ ...prev, image: file }));
 
-            // Create preview
             if (file) {
                 const reader = new FileReader();
                 reader.onloadend = () => {
@@ -118,15 +111,12 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                 };
                 reader.readAsDataURL(file);
             } else {
-                // If no file selected, revert to existing image if in edit mode
                 setImagePreview(editingProduct?.imageUrl ? getImageUrl(editingProduct.imageUrl) : null);
             }
         } else if (type === 'number') {
-            // Handle number inputs
             const numValue = value === '' ? 0 : parseFloat(value);
             setFormData(prev => ({ ...prev, [name]: numValue }));
         } else {
-            // Handle text inputs - convert empty strings to null for optional fields
             const optionalFields = ['cocoaPercentage', 'origin', 'flavorNotes', 'ingredients', 'allergenInfo'];
             const finalValue = optionalFields.includes(name) && value.trim() === '' ? null : value;
             setFormData(prev => ({ ...prev, [name]: finalValue }));
@@ -140,7 +130,6 @@ export const ProductForm: React.FC<ProductFormProps> = ({
         try {
             const submitFormData = new FormData();
 
-            // Required fields
             submitFormData.append('name', formData.name.trim());
             submitFormData.append('description', formData.description.trim());
             submitFormData.append('price', formData.price.toString());
@@ -148,20 +137,15 @@ export const ProductForm: React.FC<ProductFormProps> = ({
             submitFormData.append('categoryId', formData.categoryId.toString());
             submitFormData.append('weightInGrams', formData.weightInGrams.toString());
 
-            // Boolean fields
             submitFormData.append('isOrganic', formData.isOrganic.toString());
             submitFormData.append('isFairTrade', formData.isFairTrade.toString());
-            submitFormData.append('isVisible', formData.isVisible.toString());  // Add this line
-            // Replace the existing cocoaPercentage handling code with this:
+            submitFormData.append('isVisible', formData.isVisible.toString());  
 
-            // CocoaPercentage is required, so always append it
             const cocoaValue = formData.cocoaPercentage || '';
-            // Convert to string if it's not already
             const cocoaString = typeof cocoaValue === 'string'
                 ? cocoaValue.trim()
                 : cocoaValue.toString().trim();
 
-            // Always append cocoaPercentage - it's a required field
             submitFormData.append('cocoaPercentage', cocoaString);
 
 
@@ -181,13 +165,10 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                 submitFormData.append('allergenInfo', formData.allergenInfo.trim());
             }
 
-            // Image file - only append if a new file was selected
             if (formData.image && formData.image instanceof File && formData.image.size > 0) {
                 submitFormData.append('image', formData.image);
             }
 
-            // Debug logging
-            console.log('=== FormData being sent ===');
             for (const [key, value] of submitFormData.entries()) {
                 if (value instanceof File) {
                     console.log(`${key}: [File: ${value.name}, Size: ${value.size}]`);
@@ -195,18 +176,14 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                     console.log(`${key}: ${value}`);
                 }
             }
-            console.log('=========================');
 
             await onSubmit(submitFormData, !!editingProduct, editingProduct?.id);
 
-            // Reset form on successful creation (not edit)
             if (!editingProduct) {
                 resetForm();
             }
 
         } catch (error) {
-            console.error('Form submission error:', error);
-            // Error handling is done in parent component
         } finally {
             setIsSubmitting(false);
         }
@@ -484,25 +461,19 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                                 </p>
                                 <div className="relative">
                                     <img
-                                        // For data URLs (new uploads), use as-is
-                                        // For existing URLs from database, apply both functions
                                         src={formData.image ? imagePreview : fixImageUrl(getImageUrl(imagePreview))}
                                         alt={editingProduct?.name || 'Product preview'}
                                         className="w-full h-48 object-cover rounded-lg border border-gray-600"
                                         onError={(e) => {
-                                            console.error('Image failed to load:', imagePreview);
-                                            // Show placeholder if image fails to load
                                             const target = e.target as HTMLImageElement;
                                             target.style.display = 'none';
 
-                                            // Show the placeholder div
                                             const placeholder = target.nextElementSibling as HTMLElement;
                                             if (placeholder && placeholder.classList.contains('image-placeholder')) {
                                                 placeholder.style.display = 'flex';
                                             }
                                         }}
                                         onLoad={() => {
-                                            console.log('Image loaded successfully:', imagePreview);
                                         }}
                                     />
                                     <div
@@ -563,8 +534,6 @@ export const ProductForm: React.FC<ProductFormProps> = ({
     );
 };
 
-// Enhanced ProductList component with better image handling
-// In your products/index.tsx or wherever ProductListProps is defined:
 interface ProductListProps {
     products: ProductDto[];
     onEdit: (product: ProductDto) => void;
@@ -572,7 +541,7 @@ interface ProductListProps {
     onView: (id: number) => void;
     onAdd: () => void;
     onExport: () => void;
-    onToggleVisibility: (id: number) => void; // Add this line
+    onToggleVisibility: (id: number) => void; 
 }
 
 export const ProductList: React.FC<ProductListProps> = ({
@@ -582,7 +551,7 @@ export const ProductList: React.FC<ProductListProps> = ({
     onView,
     onAdd,
     onExport,
-    onToggleVisibility // Add this line
+    onToggleVisibility 
 }) => {
     return (
         <div className="bg-gray-900/80 border border-gray-700 rounded-lg p-6">
@@ -652,8 +621,8 @@ export const ProductList: React.FC<ProductListProps> = ({
                                         title={product.isVisible ? "Hide Product" : "Show Product"}
                                     >
                                         {product.isVisible ?
-                                            <Eye className="h-4 w-4" /> :  // Now using Eye icon for visible products
-                                            <EyeOff className="h-4 w-4" /> // Now using EyeOff icon for hidden products
+                                            <Eye className="h-4 w-4" /> : 
+                                            <EyeOff className="h-4 w-4" /> 
                                         }
                                     </button>
                                     <button
@@ -670,17 +639,14 @@ export const ProductList: React.FC<ProductListProps> = ({
                             {product.imageUrl && (
                                 <div className="mb-3 relative">
                                     <img
-                                        // Apply both functions for maximum protection
                                         src={fixImageUrl(getImageUrl(product.imageUrl))}
                                         alt={product.name}
                                         className="w-full h-32 object-cover rounded-lg"
                                         onError={(e) => {
                                             console.error('Product image failed to load:', product.imageUrl);
-                                            // Hide image if it fails to load and show placeholder
                                             const target = e.target as HTMLImageElement;
                                             target.style.display = 'none';
 
-                                            // Show placeholder
                                             const placeholder = target.nextElementSibling as HTMLElement;
                                             if (placeholder && placeholder.classList.contains('image-placeholder')) {
                                                 placeholder.style.display = 'flex';

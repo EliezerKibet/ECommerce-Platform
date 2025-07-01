@@ -1,5 +1,4 @@
-﻿// Services/CartService.cs
-using AutoMapper;
+﻿using AutoMapper;
 using ECommerce.API.Data;
 using ECommerce.API.DTOs;
 using ECommerce.API.Models;
@@ -21,7 +20,6 @@ namespace ECommerce.API.Services
 
         public async Task<CartDto> GetCartAsync(string userId)
         {
-            // Find user's active cart
             var cart = await _context.Carts
                 .Include(c => c.Items)
                     .ThenInclude(i => i.Product)
@@ -29,7 +27,6 @@ namespace ECommerce.API.Services
 
             if (cart == null)
             {
-                // Create a new cart if none exists
                 return await CreateCartAsync(userId);
             }
 
@@ -68,7 +65,6 @@ namespace ECommerce.API.Services
 
         public async Task<CartDto> AddToCartAsync(string userId, AddToCartDto addToCartDto)
         {
-            // Get or create cart
             var cart = await _context.Carts
                 .Include(c => c.Items)
                 .FirstOrDefaultAsync(c => c.UserId == userId);
@@ -85,32 +81,27 @@ namespace ECommerce.API.Services
                 _context.Carts.Add(cart);
             }
 
-            // Check if product exists
             var product = await _context.Products.FindAsync(addToCartDto.ProductId);
             if (product == null)
             {
                 throw new KeyNotFoundException($"Product with ID {addToCartDto.ProductId} not found.");
             }
 
-            // Check if product is in stock
             if (product.StockQuantity < addToCartDto.Quantity)
             {
                 throw new InvalidOperationException("Not enough stock available.");
             }
 
-            // Check if item already exists in cart
             var existingItem = cart.Items.FirstOrDefault(i => i.ProductId == addToCartDto.ProductId);
 
             if (existingItem != null)
             {
-                // Update existing item
                 existingItem.Quantity += addToCartDto.Quantity;
                 existingItem.IsGiftWrapped = addToCartDto.IsGiftWrapped;
                 existingItem.GiftMessage = addToCartDto.GiftMessage;
             }
             else
             {
-                // Add new item
                 var cartItem = new CartItem
                 {
                     CartId = cart.Id,
@@ -124,18 +115,15 @@ namespace ECommerce.API.Services
                 cart.Items.Add(cartItem);
             }
 
-            // Update cart
             cart.UpdatedAt = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
 
-            // Reload cart with products
             return await GetCartAsync(userId);
         }
 
         public async Task<CartDto> UpdateCartItemAsync(string userId, int cartItemId, UpdateCartItemDto updateCartItemDto)
         {
-            // Get user's cart
             var cart = await _context.Carts
                 .Include(c => c.Items)
                 .FirstOrDefaultAsync(c => c.UserId == userId);
@@ -145,26 +133,22 @@ namespace ECommerce.API.Services
                 throw new KeyNotFoundException("Cart not found.");
             }
 
-            // Find the cart item
             var cartItem = cart.Items.FirstOrDefault(i => i.Id == cartItemId);
             if (cartItem == null)
             {
                 throw new KeyNotFoundException($"Cart item with ID {cartItemId} not found.");
             }
 
-            // Check stock
             var product = await _context.Products.FindAsync(cartItem.ProductId);
             if (product.StockQuantity < updateCartItemDto.Quantity)
             {
                 throw new InvalidOperationException("Not enough stock available.");
             }
 
-            // Update item
             cartItem.Quantity = updateCartItemDto.Quantity;
             cartItem.IsGiftWrapped = updateCartItemDto.IsGiftWrapped;
             cartItem.GiftMessage = updateCartItemDto.GiftMessage;
 
-            // Update cart
             cart.UpdatedAt = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
@@ -174,7 +158,6 @@ namespace ECommerce.API.Services
 
         public async Task<CartDto> RemoveFromCartAsync(string userId, int cartItemId)
         {
-            // Get user's cart
             var cart = await _context.Carts
                 .Include(c => c.Items)
                 .FirstOrDefaultAsync(c => c.UserId == userId);
@@ -184,18 +167,15 @@ namespace ECommerce.API.Services
                 throw new KeyNotFoundException("Cart not found.");
             }
 
-            // Find the cart item
             var cartItem = cart.Items.FirstOrDefault(i => i.Id == cartItemId);
             if (cartItem == null)
             {
                 throw new KeyNotFoundException($"Cart item with ID {cartItemId} not found.");
             }
 
-            // Remove item
             cart.Items.Remove(cartItem);
             _context.CartItems.Remove(cartItem);
 
-            // Update cart
             cart.UpdatedAt = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
@@ -205,7 +185,6 @@ namespace ECommerce.API.Services
 
         public async Task<CartDto> ClearCartAsync(string userId)
         {
-            // Get user's cart
             var cart = await _context.Carts
                 .Include(c => c.Items)
                 .FirstOrDefaultAsync(c => c.UserId == userId);
@@ -215,7 +194,6 @@ namespace ECommerce.API.Services
                 throw new KeyNotFoundException("Cart not found.");
             }
 
-            // Remove all items
             foreach (var item in cart.Items.ToList())
             {
                 _context.CartItems.Remove(item);
@@ -231,7 +209,6 @@ namespace ECommerce.API.Services
 
         public async Task<bool> TransferGuestCartAsync(int guestCartId, string userId)
         {
-            // Get guest cart
             var guestCart = await _context.Carts
                 .Include(c => c.Items)
                 .FirstOrDefaultAsync(c => c.Id == guestCartId);
@@ -241,7 +218,6 @@ namespace ECommerce.API.Services
                 throw new KeyNotFoundException($"Guest cart with ID {guestCartId} not found.");
             }
 
-            // Get or create user cart
             var userCart = await _context.Carts
                 .Include(c => c.Items)
                 .FirstOrDefaultAsync(c => c.UserId == userId);
@@ -259,21 +235,18 @@ namespace ECommerce.API.Services
                 await _context.SaveChangesAsync();
             }
 
-            // Transfer items
             foreach (var guestItem in guestCart.Items)
             {
                 var existingItem = userCart.Items.FirstOrDefault(i => i.ProductId == guestItem.ProductId);
 
                 if (existingItem != null)
                 {
-                    // Update quantity of existing item
                     existingItem.Quantity += guestItem.Quantity;
                     existingItem.IsGiftWrapped = guestItem.IsGiftWrapped;
                     existingItem.GiftMessage = guestItem.GiftMessage;
                 }
                 else
                 {
-                    // Create new item in user's cart
                     var newItem = new CartItem
                     {
                         CartId = userCart.Id,
@@ -288,10 +261,8 @@ namespace ECommerce.API.Services
                 }
             }
 
-            // Update user cart
             userCart.UpdatedAt = DateTime.UtcNow;
 
-            // Delete guest cart
             _context.CartItems.RemoveRange(guestCart.Items);
             _context.Carts.Remove(guestCart);
 
@@ -302,7 +273,6 @@ namespace ECommerce.API.Services
 
         public async Task<CartDto> MergeCartsAsync(string sourceUserId, string targetUserId)
         {
-            // Get the source cart (usually guest cart)
             var sourceCart = await _context.Carts
                 .Include(c => c.Items)
                     .ThenInclude(i => i.Product)
@@ -310,11 +280,9 @@ namespace ECommerce.API.Services
 
             if (sourceCart == null || !sourceCart.Items.Any())
             {
-                // No source cart or empty cart, nothing to migrate
                 return await GetCartAsync(targetUserId);
             }
 
-            // Get or create the target cart (user's cart)
             var targetCart = await _context.Carts
                 .Include(c => c.Items)
                     .ThenInclude(i => i.Product)
@@ -333,22 +301,18 @@ namespace ECommerce.API.Services
                 await _context.SaveChangesAsync();
             }
 
-            // Merge items
             foreach (var sourceItem in sourceCart.Items)
             {
-                // Check if the product already exists in the target cart
                 var existingItem = targetCart.Items.FirstOrDefault(i => i.ProductId == sourceItem.ProductId);
 
                 if (existingItem != null)
                 {
-                    // Update quantity and gift options
                     existingItem.Quantity += sourceItem.Quantity;
                     existingItem.IsGiftWrapped = sourceItem.IsGiftWrapped;
                     existingItem.GiftMessage = sourceItem.GiftMessage;
                 }
                 else
                 {
-                    // Create a new item in the target cart
                     var newItem = new CartItem
                     {
                         CartId = targetCart.Id,
@@ -362,25 +326,22 @@ namespace ECommerce.API.Services
                 }
             }
 
-            // Update the target cart
             targetCart.UpdatedAt = DateTime.UtcNow;
 
-            // Delete the source cart items
             _context.CartItems.RemoveRange(sourceCart.Items);
 
-            // Delete the source cart
             _context.Carts.Remove(sourceCart);
 
-            // Save all changes
+
             await _context.SaveChangesAsync();
 
-            // Return the updated target cart
+
             return MapCartToDto(targetCart);
         }
 
         private CartDto MapCartToDto(Cart cart)
         {
-            // Map the cart and its items to DTO
+
             var cartDto = new CartDto
             {
                 Id = cart.Id,
@@ -417,7 +378,7 @@ namespace ECommerce.API.Services
                 cartDto.Items.Add(itemDto);
             }
 
-            // Calculate totals - adjust tax rate as needed
+
             const decimal taxRate = 0.08m; // 8% tax
             cartDto.Subtotal = subtotal;
             cartDto.Tax = Math.Round(subtotal * taxRate, 2);

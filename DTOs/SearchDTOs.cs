@@ -1,9 +1,7 @@
-﻿// DTOs/SearchDTOs.cs
-public class AdvancedSearchDto
+﻿public class AdvancedSearchDto
 {
-    public string Query { get; set; } // Basic search term
+    public string Query { get; set; }
 
-    // Filters
     public List<int> CategoryIds { get; set; }
     public decimal? MinPrice { get; set; }
     public decimal? MaxPrice { get; set; }
@@ -13,13 +11,11 @@ public class AdvancedSearchDto
     public bool? IsFairTrade { get; set; }
     public int? MinCocoaPercentage { get; set; }
     public int? MaxCocoaPercentage { get; set; }
-    public List<string> Allergens { get; set; } // Allergens to exclude
+    public List<string> Allergens { get; set; } 
 
-    // Sorting
-    public string SortBy { get; set; } // Price, Rating, Popularity, Name
+    public string SortBy { get; set; } 
     public bool SortDescending { get; set; }
 
-    // Pagination
     public int Page { get; set; } = 1;
     public int PageSize { get; set; } = 12;
 }

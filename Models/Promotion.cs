@@ -1,5 +1,4 @@
-﻿// Models/Promotion.cs
-using ECommerce.API.Models;
+﻿using ECommerce.API.Models;
 
 public class Promotion
 {
@@ -11,15 +10,13 @@ public class Promotion
     public DateTime EndDate { get; set; }
     public bool IsActive { get; set; } = true;
     public string BannerImageUrl { get; set; }
-    public PromotionType Type { get; set; } // Flash sale, seasonal, etc.
-    public string ColorScheme { get; set; } // For frontend styling (optional)
+    public PromotionType Type { get; set; } 
+    public string ColorScheme { get; set; } 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-    // Navigation properties
     public List<PromotionProduct> Products { get; set; }
 }
 
-// Promotion type enum
 public enum PromotionType
 {
     FlashSale = 1,
@@ -30,7 +27,6 @@ public enum PromotionType
     BundleDeal = 6
 }
 
-// Many-to-many relationship with products
 public class PromotionProduct
 {
     public int PromotionId { get; set; }

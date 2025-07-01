@@ -1,5 +1,4 @@
-﻿// DTOs/ProductDetailDto.cs
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace ECommerce.API.DTOs
 {

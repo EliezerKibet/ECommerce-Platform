@@ -1,5 +1,4 @@
-﻿// src/components/AddressCard.tsx
-import React from 'react';
+﻿import React from 'react';
 import { ShippingAddress } from '../services/shippingAddressService';
 
 interface AddressCardProps {

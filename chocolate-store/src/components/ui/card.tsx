@@ -1,4 +1,3 @@
-// components/ui/card.tsx - Dark themed card components
 import React from 'react'
 
 export const Card: React.FC<{

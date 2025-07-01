@@ -1,5 +1,4 @@
-﻿// Repositories/CategoryRepository.cs
-using ECommerce.API.Data;
+﻿using ECommerce.API.Data;
 using ECommerce.API.Interfaces;
 using ECommerce.API.Models;
 using Microsoft.EntityFrameworkCore;

@@ -1,5 +1,4 @@
-﻿// Services/EmailService.cs - Enhanced with debugging
-using System;
+﻿using System;
 using System.Threading.Tasks;
 using ECommerce.API.Interfaces;
 using Microsoft.Extensions.Configuration;

@@ -1,5 +1,4 @@
-﻿// Interfaces/IOrderItemRepository.cs
-using ECommerce.API.Models;
+﻿using ECommerce.API.Models;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 

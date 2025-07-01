@@ -1,6 +1,5 @@
 ﻿namespace ECommerce.API.Models
 {
-    // Models/Product.cs
     public class Product
     {
         public int Id { get; set; }
@@ -12,7 +11,6 @@
         public int CategoryId { get; set; }
         public Category Category { get; set; }
 
-        // Chocolate-specific properties
         public string CocoaPercentage { get; set; }
         public string Origin { get; set; }
         public string FlavorNotes { get; set; }
@@ -23,8 +21,7 @@
         public string AllergenInfo { get; set; }
         public double AverageRating { get; set; }
         public int ReviewCount { get; set; }
-        public bool IsVisible { get; set; } = true; // Default to visible
-        // Add to your Product.cs model
+        public bool IsVisible { get; set; } = true; 
         public List<PromotionProduct> Promotions { get; set; } = new List<PromotionProduct>();
     }
 }

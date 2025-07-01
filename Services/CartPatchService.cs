@@ -18,9 +18,6 @@ namespace ECommerce.API.Services
             _logger = logger;
         }
 
-        /// <summary>
-        /// Ensures a cart exists and has a valid Items collection
-        /// </summary>
         public async Task<CartDto> EnsureValidCartAsync(string userId)
         {
             try
@@ -29,13 +26,10 @@ namespace ECommerce.API.Services
 
                 var cart = await _cartService.GetCartAsync(userId);
 
-                // Check if cart is null
                 if (cart == null)
                 {
                     _logger.LogWarning("Cart is null for user {UserId}, creating a new cart", userId);
 
-                    // Some cart implementations might return null rather than empty cart
-                    // Create a new cart in this case
                     try
                     {
                         cart = await _cartService.CreateCartAsync(userId);
@@ -44,7 +38,6 @@ namespace ECommerce.API.Services
                     catch (Exception ex)
                     {
                         _logger.LogError(ex, "Failed to create new cart for user {UserId}", userId);
-                        // Return a minimal valid cart to prevent null reference exceptions
                         return new CartDto
                         {
                             UserId = userId,
@@ -56,13 +49,10 @@ namespace ECommerce.API.Services
                         };
                     }
                 }
-
-                // Check if Items is null
                 if (cart.Items == null)
                 {
                     _logger.LogWarning("Cart.Items is null for user {UserId}, initializing empty collection", userId);
 
-                    // Initialize an empty collection to prevent null reference exceptions
                     cart.Items = new List<CartItemDto>();
                 }
 
@@ -75,9 +65,6 @@ namespace ECommerce.API.Services
             }
         }
 
-        /// <summary>
-        /// Checks if a cart has items and throws a user-friendly exception if not
-        /// </summary>
         public async Task ValidateCartHasItemsAsync(string userId)
         {
             var cart = await EnsureValidCartAsync(userId);

@@ -1,5 +1,4 @@
-﻿// Fixed DTOs/PromotionDtos.cs
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 public class PromotionDto
 {
@@ -47,10 +46,8 @@ public class CreateUpdatePromotionDto : IValidatableObject
 
     public List<int> ProductIds { get; set; } = new List<int>();
 
-    // ✅ SMART VALIDATION - Only validates past dates for NEW promotions
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {
-        // Always validate that end date is after start date
         if (EndDate <= StartDate)
         {
             yield return new ValidationResult(
@@ -59,7 +56,6 @@ public class CreateUpdatePromotionDto : IValidatableObject
             );
         }
 
-        // ✅ FIXED: Only validate past start dates for NEW promotions (not updates)
         var httpContext = validationContext.GetService<IHttpContextAccessor>()?.HttpContext;
         var isUpdate = httpContext?.Request?.Method == "PUT";
 
@@ -71,7 +67,6 @@ public class CreateUpdatePromotionDto : IValidatableObject
             );
         }
 
-        // Validate product IDs
         if (ProductIds == null || ProductIds.Count == 0)
         {
             yield return new ValidationResult(

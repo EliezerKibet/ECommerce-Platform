@@ -8,9 +8,6 @@ namespace ECommerce.API.Services
 {
     public static class OrderServiceExtensions
     {
-        /// <summary>
-        /// Safe wrapper around CreateOrderFromCartAsync that handles potential null cart properties
-        /// </summary>
         public static async Task<Order> SafeCreateOrderAsync(
             this IOrderService orderService,
             ICartService cartService,

@@ -1,5 +1,4 @@
-﻿// DTOs/ProductDto.cs
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 public class ProductDto
 {
@@ -12,7 +11,6 @@ public class ProductDto
     public int CategoryId { get; set; }
     public string CategoryName { get; set; }
 
-    // Chocolate-specific properties
     public string CocoaPercentage { get; set; }
     public string Origin { get; set; }
     public string FlavorNotes { get; set; }
@@ -52,10 +50,8 @@ public class ProductCreateUpdateDto
     [Range(1, 10000, ErrorMessage = "Weight must be between 1 and 10000 grams")]
     public int WeightInGrams { get; set; }
 
-    // Make Image optional by removing [Required] attribute
     public IFormFile? Image { get; set; }
 
-    // Optional chocolate-specific properties
     [Required(ErrorMessage = "Cocoa percentage is required")]
     [StringLength(100, ErrorMessage = "Cocoa percentage cannot exceed 100 characters")]
     public string CocoaPercentage { get; set; }
@@ -75,5 +71,5 @@ public class ProductCreateUpdateDto
 
     [StringLength(1000, ErrorMessage = "Allergen info cannot exceed 1000 characters")]
     public string? AllergenInfo { get; set; }
-    public bool IsVisible { get; set; } = true; // Default to visible
+    public bool IsVisible { get; set; } = true; 
 }

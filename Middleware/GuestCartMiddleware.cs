@@ -1,5 +1,4 @@
-﻿// Middleware/GuestCartMiddleware.cs
-namespace ECommerce.API.Middleware
+﻿namespace ECommerce.API.Middleware
 {
     public class GuestCartMiddleware
     {
@@ -12,17 +11,14 @@ namespace ECommerce.API.Middleware
 
         public async Task InvokeAsync(HttpContext context)
         {
-            // Check if user is not authenticated and doesn't have a guest ID cookie
             if (!context.User.Identity.IsAuthenticated && !context.Request.Cookies.ContainsKey("GuestId"))
             {
-                // Generate a new guest ID
                 string guestId = Guid.NewGuid().ToString();
 
-                // Add guest ID cookie
                 context.Response.Cookies.Append("GuestId", guestId, new CookieOptions
                 {
                     HttpOnly = true,
-                    Expires = DateTime.UtcNow.AddDays(30),  // Expires in 30 days
+                    Expires = DateTime.UtcNow.AddDays(30),  
                     SameSite = SameSiteMode.Lax,
                     IsEssential = true
                 });
@@ -32,7 +28,6 @@ namespace ECommerce.API.Middleware
         }
     }
 
-    // Extension method for middleware registration
     public static class GuestCartMiddlewareExtensions
     {
         public static IApplicationBuilder UseGuestCart(this IApplicationBuilder builder)

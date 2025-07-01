@@ -1,5 +1,4 @@
-﻿// === CORRECTED FORGOT PASSWORD PAGE (src/app/auth/forgot-password/page.tsx) ===
-'use client';
+﻿'use client';
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
@@ -17,15 +16,6 @@ export default function ForgotPasswordPage() {
     const searchParams = useSearchParams();
     const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-    // useEffect(() => {
-    //     const cookies = parseCookies();
-    //     if (cookies.token) {
-    //         router.push('/');
-    //     }
-    // }, [router]);
-
-
-    // Countdown timer for resend cooldown
     useEffect(() => {
         let timer: NodeJS.Timeout;
         if (countdown > 0) {
@@ -39,13 +29,11 @@ export default function ForgotPasswordPage() {
     }, [countdown, canResend]);
 
     useEffect(() => {
-        // 1. Try to get email from query string
         const emailParam = searchParams.get('email');
         if (emailParam) {
             setEmail(emailParam);
             return;
         }
-        // 2. Try to get email from localStorage (if user is signed in)
         if (typeof window !== 'undefined') {
             const storedUser = localStorage.getItem('user');
             if (storedUser) {
@@ -93,7 +81,6 @@ export default function ForgotPasswordPage() {
                 setResendCount(resendCount + 1);
                 toast.success('Password reset email sent! Please check your inbox.');
 
-                // Set cooldown for resending (60 seconds)
                 if (resendCount >= 0) {
                     setCanResend(false);
                     setCountdown(60);
@@ -129,7 +116,6 @@ export default function ForgotPasswordPage() {
         setCountdown(0);
     };
 
-    // Success/Confirmation Screen
     if (submitted) {
         return (
             <div className="min-h-screen flex items-center justify-center relative bg-gradient-to-br from-[#1a1713] via-[#2a211c] to-[#1a1713]">
@@ -253,7 +239,6 @@ export default function ForgotPasswordPage() {
         );
     }
 
-    // Main Forgot Password Form
     return (
         <div className="min-h-screen flex items-center justify-center relative bg-gradient-to-br from-[#1a1713] via-[#2a211c] to-[#1a1713]">
             {/* Animated background elements */}

@@ -1,4 +1,5 @@
-﻿'use client';
+﻿/* eslint-disable @typescript-eslint/no-unused-vars */
+'use client';
 
 import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
@@ -7,7 +8,6 @@ import { getProducts, getCategories } from '@/lib/services';
 import { Product, Category } from '@/types';
 import { useReviews } from '@/hooks/useReviews';
 
-// Type definitions
 interface ProductWrapper {
     $id?: string;
     product: Product;
@@ -53,14 +53,11 @@ export default function ProductsPage() {
     const [user, setUser] = useState<User | null>(null);
     const [showCartNotification, setShowCartNotification] = useState(false);
 
-    // Review integration
     useReviews();
     const [productReviews, setProductReviews] = useState<{ [productId: number]: ReviewSummary }>({});
 
-    // API Base URL
     const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5202';
 
-    // Simplified auth headers
     const getAuthHeaders = (): Record<string, string> => {
         const headers: Record<string, string> = {
             'Content-Type': 'application/json'
@@ -80,7 +77,6 @@ export default function ProductsPage() {
         return headers;
     };
 
-    // Fetch cart count
     const fetchCartCount = async (): Promise<void> => {
         try {
             const headers = getAuthHeaders();
@@ -101,14 +97,11 @@ export default function ProductsPage() {
         }
     };
 
-    // Function to fetch review summaries for products
     const fetchProductReviewSummaries = async (productIds: number[]) => {
         if (productIds.length === 0) return;
 
         try {
-            console.log('📊 Fetching review summaries for products:', productIds);
 
-            // Batch fetch review summaries
             const summaryPromises = productIds.map(async (productId) => {
                 try {
                     const response = await fetch(`${API_BASE_URL}/api/products/${productId}/reviews/summary`);
@@ -133,7 +126,6 @@ export default function ProductsPage() {
             });
 
             setProductReviews(summaries);
-            console.log('📊 Loaded review summaries:', summaries);
         } catch (error) {
             console.error('Error fetching review summaries:', error);
         }
@@ -142,7 +134,6 @@ export default function ProductsPage() {
     // Add item to cart function
     const addToCart = async (productId: number, quantity: number = 1): Promise<boolean> => {
         try {
-            console.log('🛒 Adding product to cart...', { productId, quantity });
 
             const headers = getAuthHeaders();
             const response = await fetch(`${API_BASE_URL}/api/Carts/items`, {
@@ -158,8 +149,6 @@ export default function ProductsPage() {
             });
 
             if (response.ok) {
-                const result = await response.json();
-                console.log('✅ Item added to cart:', result);
 
                 await fetchCartCount();
                 setShowCartNotification(true);
@@ -167,12 +156,9 @@ export default function ProductsPage() {
 
                 return true;
             } else {
-                const errorText = await response.text();
-                console.error('❌ Failed to add to cart:', response.status, errorText);
                 return false;
             }
         } catch (error) {
-            console.error('❌ Error adding to cart:', error);
             return false;
         }
     };
@@ -221,10 +207,8 @@ export default function ProductsPage() {
 
                 setProducts(extractedProducts);
 
-                // Fetch cart count and review summaries
                 await fetchCartCount();
 
-                // Fetch review summaries for all products
                 const productIds = extractedProducts
                     .filter(p => p && p.id)
                     .map(p => p.id);
@@ -263,7 +247,6 @@ export default function ProductsPage() {
             });
         }
 
-        // Filter by search term
         if (searchTerm) {
             filtered = filtered.filter((product: Product) =>
                 product.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -271,7 +254,6 @@ export default function ProductsPage() {
             );
         }
 
-        // Sort products
         filtered = [...filtered].sort((a, b) => {
             switch (sortBy) {
                 case 'price-low':
@@ -620,7 +602,6 @@ function ProductCard({ product, onAddToCart, reviewSummary }: ProductCardProps) 
         ? product.price.toFixed(2)
         : '0.00';
 
-    // Use review summary from props instead of product data
     const hasRating = reviewSummary && reviewSummary.averageRating > 0;
     const hasReviews = reviewSummary && reviewSummary.totalReviews > 0;
 

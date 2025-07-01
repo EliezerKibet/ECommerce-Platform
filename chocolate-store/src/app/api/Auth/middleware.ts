@@ -38,13 +38,11 @@ export function verifyToken(token: string): AuthUser | null {
 }
 
 export function extractTokenFromRequest(request: NextRequest): string | null {
-    // Check Authorization header
     const authHeader = request.headers.get('authorization');
     if (authHeader && authHeader.startsWith('Bearer ')) {
         return authHeader.substring(7);
     }
 
-    // Check cookies (if you're using cookie-based auth)
     const token = request.cookies.get('adminToken')?.value;
     if (token) {
         return token;

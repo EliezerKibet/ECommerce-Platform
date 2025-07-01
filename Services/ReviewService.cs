@@ -1,6 +1,4 @@
-﻿// Fixed ReviewService implementation - resolving method signature conflicts
-// Services/ReviewService.cs
-using ECommerce.API.Data;
+﻿using ECommerce.API.Data;
 using ECommerce.API.DTOs;
 using ECommerce.API.Interfaces;
 using ECommerce.API.Models;
@@ -24,11 +22,10 @@ namespace ECommerce.API.Services
             _logger = logger;
         }
 
-        // CUSTOMER-FACING METHODS (Only approved reviews)
         public async Task<List<ReviewDto>> GetProductReviewsAsync(int productId, int page = 1, int pageSize = 10)
         {
             var query = _context.Reviews
-                .Where(r => r.ProductId == productId && r.IsApproved) // Only approved reviews
+                .Where(r => r.ProductId == productId && r.IsApproved)
                 .OrderByDescending(r => r.CreatedAt)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize);
@@ -107,7 +104,7 @@ namespace ECommerce.API.Services
                 Title = dto.Title,
                 Comment = dto.Comment,
                 IsVerifiedPurchase = await HasUserPurchasedProductAsync(productId, userId),
-                IsApproved = false, // Default to pending approval
+                IsApproved = false,
                 CreatedAt = DateTime.UtcNow
             };
 
@@ -143,7 +140,7 @@ namespace ECommerce.API.Services
             review.Title = dto.Title;
             review.Comment = dto.Comment;
             review.UpdatedAt = DateTime.UtcNow;
-            review.IsApproved = false; // Reset approval when updated
+            review.IsApproved = false;
 
             await _context.SaveChangesAsync();
 
@@ -180,7 +177,7 @@ namespace ECommerce.API.Services
         public async Task<ProductRatingsSummaryDto> GetProductRatingsSummaryAsync(int productId)
         {
             var reviews = await _context.Reviews
-                .Where(r => r.ProductId == productId && r.IsApproved) // Only approved reviews
+                .Where(r => r.ProductId == productId && r.IsApproved) 
                 .ToListAsync();
 
             if (!reviews.Any())
@@ -201,7 +198,6 @@ namespace ECommerce.API.Services
                 .GroupBy(r => r.Rating)
                 .ToDictionary(g => g.Key, g => g.Count());
 
-            // Fill in missing ratings with 0
             for (int i = 1; i <= 5; i++)
             {
                 if (!ratingBreakdown.ContainsKey(i))
@@ -223,55 +219,13 @@ namespace ECommerce.API.Services
                 .AnyAsync(r => r.ProductId == productId && r.UserId == userId);
         }
 
-        // In your ReviewService.cs - Updated HasUserPurchasedProductAsync method
 
         public async Task<bool> HasUserPurchasedProductAsync(int productId, string userId)
         {
-            // OPTION 1: For demo purposes - always return true (RECOMMENDED for testing)
             return true;
 
-            // OPTION 2: Keep original logic but add logging for debugging
-            /*
-            try 
-            {
-                _logger.LogInformation("Checking if user {UserId} purchased product {ProductId}", userId, productId);
-
-                // Check both regular users and guest users (with guest- prefix)
-                var hasRegularPurchase = await _context.Orders
-                    .AnyAsync(o => o.UserId == userId &&
-                                  o.OrderItems.Any(oi => oi.ProductId == productId));
-
-                _logger.LogInformation("Regular purchase check for user {UserId}, product {ProductId}: {HasPurchase}", 
-                    userId, productId, hasRegularPurchase);
-
-                if (hasRegularPurchase)
-                    return true;
-
-                // For guest users, check if userId starts with "guest-"
-                if (userId.StartsWith("guest-"))
-                {
-                    var hasGuestPurchase = await _context.Orders
-                        .AnyAsync(o => o.UserId == userId &&
-                                      o.OrderItems.Any(oi => oi.ProductId == productId));
-
-                    _logger.LogInformation("Guest purchase check for user {UserId}, product {ProductId}: {HasPurchase}", 
-                        userId, productId, hasGuestPurchase);
-
-                    return hasGuestPurchase;
-                }
-
-                _logger.LogInformation("No purchase found for user {UserId}, product {ProductId}", userId, productId);
-                return false;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error checking purchase for user {UserId}, product {ProductId}", userId, productId);
-                return false;
-            }
-            */
         }
 
-        // ADMIN METHODS - Return AdminReviewDto with product info
         public async Task<List<AdminReviewDto>> GetAllReviewsForAdminAsync(int page = 1, int pageSize = 20)
         {
             var query = _context.Reviews
@@ -355,7 +309,6 @@ namespace ECommerce.API.Services
             }).ToList();
         }
 
-        // Enhanced admin approval methods with admin tracking
         public async Task<bool> ApproveReviewAsync(int reviewId, string adminId)
         {
             var review = await _context.Reviews.FindAsync(reviewId);
@@ -396,7 +349,6 @@ namespace ECommerce.API.Services
             return true;
         }
 
-        // Additional admin helper methods
         public async Task<AdminReviewDto> GetReviewForAdminAsync(int reviewId)
         {
             var review = await _context.Reviews
@@ -433,18 +385,16 @@ namespace ECommerce.API.Services
             return await _context.Reviews.CountAsync();
         }
 
-        // BACKWARD COMPATIBILITY METHODS
         public async Task<bool> ApproveReviewAsync(int id)
         {
-            return await ApproveReviewAsync(id, "system"); // Default admin ID
+            return await ApproveReviewAsync(id, "system");
         }
 
         public async Task<bool> RejectReviewAsync(int id)
         {
-            return await RejectReviewAsync(id, "system"); // Default admin ID
+            return await RejectReviewAsync(id, "system"); 
         }
 
-        // Backward compatibility for existing controller - returns List<ReviewDto>
         public async Task<List<ReviewDto>> GetAllReviewsAsync(int page, int pageSize)
         {
             var query = _context.Reviews
@@ -479,12 +429,9 @@ namespace ECommerce.API.Services
                 return false;
             }
 
-            // Toggle the approval status
             review.IsApproved = !review.IsApproved;
             review.UpdatedAt = DateTime.UtcNow;
 
-            // Optionally track who performed this action if you have a field for it
-            // review.LastModifiedById = adminId;
 
             await _context.SaveChangesAsync();
 

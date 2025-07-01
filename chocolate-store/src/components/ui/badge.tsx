@@ -1,4 +1,3 @@
-// components/ui/badge.tsx - Dark themed badge component
 import React from 'react'
 
 export interface BadgeProps {

@@ -1,4 +1,4 @@
-﻿// src/app/products/[id]/page.tsx - Fixed for nested API response structure
+﻿/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client';
 
 import { useState, useEffect, use } from 'react';
@@ -58,7 +58,6 @@ export default function ProductDetailPage({
 
     const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5202';
 
-    // Get auth headers for cart operations
     const getAuthHeaders = (): Record<string, string> => {
         const headers: Record<string, string> = {
             'Content-Type': 'application/json',
@@ -78,24 +77,18 @@ export default function ProductDetailPage({
         return headers;
     };
 
-    // Fetch product details using the correct endpoint
     const fetchProduct = async () => {
         try {
             const url = `${API_BASE_URL}/api/products/${id}`;
-            console.log('📡 Fetching product from:', url);
 
             const response = await fetch(url);
-            console.log('📡 Response status:', response.status);
 
             if (response.ok) {
                 const responseData = await response.json();
-                console.log('📦 Raw API response:', responseData);
 
-                // Handle the nested response structure from your controller
                 let productResponse: ProductApiResponse;
 
                 if (responseData.product) {
-                    // Standard response with nested product
                     productResponse = {
                         product: responseData.product,
                         isFavorite: responseData.isFavorite || false,
@@ -105,7 +98,6 @@ export default function ProductDetailPage({
                         savings: responseData.savings
                     };
                 } else if (responseData.Product) {
-                    // Alternative casing
                     productResponse = {
                         product: responseData.Product,
                         isFavorite: responseData.IsFavorite || false,
@@ -115,42 +107,32 @@ export default function ProductDetailPage({
                         savings: responseData.Savings
                     };
                 } else {
-                    // Direct product response (fallback)
                     productResponse = {
                         product: responseData,
                         isFavorite: false
                     };
                 }
 
-                console.log('📦 Processed product data:', productResponse);
                 setProductData(productResponse);
                 setError(null);
             } else {
-                const errorText = await response.text();
-                console.error('❌ Product fetch failed:', response.status, errorText);
                 setError(`Failed to load product: ${response.status} ${response.statusText}`);
             }
         } catch (error) {
-            console.error('❌ Error fetching product:', error);
             setError(`Network error: ${error instanceof Error ? error.message : 'Unknown error'}`);
         } finally {
             setLoading(false);
         }
     };
 
-    // Alternative: Use the /details endpoint if available
     const fetchProductDetails = async () => {
         try {
             const url = `${API_BASE_URL}/api/products/${id}/details`;
-            console.log('📡 Fetching product details from:', url);
 
             const response = await fetch(url);
-            console.log('📡 Details response status:', response.status);
 
             if (response.ok) {
                 const detailsData = await response.json();
-                console.log('📦 Product details response:', detailsData);
-
                 // Extract data from details response
                 if (detailsData.product || detailsData.Product) {
                     const product = detailsData.product || detailsData.Product;
@@ -162,52 +144,44 @@ export default function ProductDetailPage({
                         isFavorite: detailsData.isFavorite || detailsData.IsFavorite || false
                     });
 
-                    // Set reviews directly from details response
                     if (Array.isArray(reviews)) {
                         setReviews(reviews);
                     } else if (reviews && Array.isArray(reviews.$values)) {
                         setReviews(reviews.$values);
                     }
 
-                    // Set rating summary directly from details response
                     if (ratingSummary) {
                         setReviewSummary(ratingSummary);
                     }
 
                     setError(null);
-                    return true; // Success
+                    return true; 
                 }
             }
-            return false; // Failed
+            return false; 
         } catch (error) {
-            console.error('❌ Error fetching product details:', error);
-            return false; // Failed
+            return false; 
         }
     };
 
-    // Fetch review summary separately
     const fetchReviewSummary = async () => {
         try {
             const url = `${API_BASE_URL}/api/products/${id}/reviews/summary`;
             const response = await fetch(url);
             if (response.ok) {
                 const summary = await response.json();
-                console.log('📊 Review summary:', summary);
                 setReviewSummary(summary);
             }
         } catch (error) {
-            console.error('❌ Error fetching review summary:', error);
         }
     };
 
-    // Fetch reviews separately
     const fetchReviews = async () => {
         try {
             const url = `${API_BASE_URL}/api/products/${id}/reviews`;
             const response = await fetch(url);
             if (response.ok) {
                 const reviewsData = await response.json();
-                console.log('💬 Reviews data:', reviewsData);
 
                 let reviewsList: ReviewDto[] = [];
                 if (Array.isArray(reviewsData)) {
@@ -219,11 +193,9 @@ export default function ProductDetailPage({
                 setReviews(reviewsList);
             }
         } catch (error) {
-            console.error('❌ Error fetching reviews:', error);
         }
     };
 
-    // Add to cart function
     const handleAddToCart = async () => {
         if (!productData?.product?.id || addingToCart) return;
 
@@ -258,9 +230,7 @@ export default function ProductDetailPage({
 
     useEffect(() => {
         if (id) {
-            console.log('🚀 Loading product data for ID:', id);
 
-            // Try the details endpoint first, fall back to regular endpoint
             fetchProductDetails().then(success => {
                 if (!success) {
                     console.log('📡 Details endpoint failed, trying regular endpoint');
@@ -268,14 +238,12 @@ export default function ProductDetailPage({
                     fetchReviewSummary();
                     fetchReviews();
                 } else {
-                    console.log('✅ Successfully loaded from details endpoint');
                     setLoading(false);
                 }
             });
         }
     }, [id]);
 
-    // Render star rating
     const renderStars = (rating: number, size: 'sm' | 'md' = 'sm') => {
         const starSize = size === 'sm' ? 'text-sm' : 'text-base';
         return (
@@ -290,7 +258,6 @@ export default function ProductDetailPage({
         );
     };
 
-    // Safe image URL helper
     const getImageUrl = (imageUrl: string | null | undefined) => {
         if (!imageUrl) return null;
         if (imageUrl.startsWith('http')) return imageUrl;

@@ -10,7 +10,6 @@ namespace ECommerce.API.DTOs
         [Required]
         public decimal OrderAmount { get; set; }
 
-        // Add this field to provide promotion context
         public decimal PromotionDiscount { get; set; } = 0;
     }
 }

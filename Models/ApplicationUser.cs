@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Identity;
 
 namespace ECommerce.API.Models
 {
-    // Models/ApplicationUser.cs
     public class ApplicationUser : IdentityUser
     {
         public string FirstName { get; set; }

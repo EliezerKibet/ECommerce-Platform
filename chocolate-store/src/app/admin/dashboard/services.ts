@@ -1,5 +1,4 @@
-﻿// API services for admin dashboard
-
+﻿
 import {
     SalesSummaryDto,
     AllTimeSalesDto,
@@ -17,7 +16,6 @@ import {
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5202';
 
-// Helper function to get auth headers
 function getAuthHeaders() {
     const token = localStorage.getItem('adminToken');
     return {
@@ -26,7 +24,6 @@ function getAuthHeaders() {
     };
 }
 
-// Enhanced helper function to handle API responses with better error details
 async function handleApiResponse(response: Response) {
     console.log('Response status:', response.status);
     console.log('Response URL:', response.url);
@@ -49,7 +46,6 @@ async function handleApiResponse(response: Response) {
                     errorDetails = { rawResponse: textResponse };
                 }
             } catch {
-                // Ignore if we can't get text either
             }
         }
 
@@ -60,9 +56,7 @@ async function handleApiResponse(response: Response) {
     }
 
     const data = await response.json();
-    console.log('Success response data:', data);
 
-    // Handle ASP.NET Core's JSON serialization format with $id and $values
     if (data && typeof data === 'object' && '$values' in data) {
         return data.$values;
     }
@@ -71,7 +65,6 @@ async function handleApiResponse(response: Response) {
 }
 
 export const adminAnalyticsService = {
-    // Sales Analytics with fallback to customer count only
     getSalesSummary: async (startDate?: string, endDate?: string): Promise<SalesSummaryDto> => {
         const params = new URLSearchParams();
         if (startDate) params.append('startDate', startDate);
@@ -85,12 +78,10 @@ export const adminAnalyticsService = {
         } catch (error) {
             console.error('Sales summary failed, attempting fallback to customer count:', error);
 
-            // Fallback 1: Try to get customer count only
             try {
                 const customerData = await adminAnalyticsService.getTotalCustomers();
                 console.log('Fallback customer data:', customerData);
 
-                // Return a minimal sales summary with real customer count
                 return {
                     totalRevenue: 0,
                     totalOrders: 0,
@@ -106,9 +97,7 @@ export const adminAnalyticsService = {
                     }
                 };
             } catch (fallbackError) {
-                console.error('Customer count fallback also failed:', fallbackError);
 
-                // Fallback 2: Return empty data but don't throw
                 return {
                     totalRevenue: 0,
                     totalOrders: 0,
@@ -167,7 +156,6 @@ export const adminAnalyticsService = {
 
     getSalesOrders: async (page: number = 1, pageSize: number = 50): Promise<SalesOrderDto> => {
         try {
-            console.log('🌐 Making API call to:', `${API_BASE_URL}/api/admin/analytics/sales/orders?page=${page}&pageSize=${pageSize}`);
 
             const response = await fetch(`${API_BASE_URL}/api/admin/analytics/sales/orders?page=${page}&pageSize=${pageSize}`, {
                 headers: getAuthHeaders()
@@ -175,7 +163,6 @@ export const adminAnalyticsService = {
 
             const rawData = await handleApiResponse(response);
 
-            // Handle different response structures
             let data: {
                 orders: Array<{
                     orderId: string | number;
@@ -216,17 +203,13 @@ export const adminAnalyticsService = {
                 };
             };
 
-            // Check if the response has the expected structure
             if (rawData && typeof rawData === 'object' && 'orders' in rawData) {
                 const ordersData = rawData.orders;
                 let ordersArray: AspNetOrder[] | null = null;
 
-                // Check if it's the $values format (ASP.NET Core serialization)
                 if (ordersData && typeof ordersData === 'object' && '$values' in ordersData && Array.isArray(ordersData.$values)) {
-                    console.log('✅ Found orders in $values format with length:', ordersData.$values.length);
                     ordersArray = ordersData.$values as AspNetOrder[];
                 } else if (Array.isArray(ordersData)) {
-                    console.log('✅ Found orders array directly with length:', ordersData.length);
                     ordersArray = ordersData as AspNetOrder[];
                 }
 
@@ -236,7 +219,6 @@ export const adminAnalyticsService = {
                         paginationData = (paginationData as AspNetValueResponse<unknown>).$values;
                     }
 
-                    // Map AspNetOrder[] to the expected shape for SalesOrderDto
                     data = {
                         orders: ordersArray.map((order) => {
                             let orderItemsArray: AspNetOrderItem[] = [];
@@ -252,7 +234,6 @@ export const adminAnalyticsService = {
                                 }
                             }
 
-                            // Ensure orderId is never undefined
                             const orderId = order.orderId ?? order.id ?? 0;
 
                             return {
@@ -288,7 +269,6 @@ export const adminAnalyticsService = {
                         pagination: paginationData
                     };
                 } else {
-                    console.warn('⚠️ Orders property exists but is not an array or $values format');
                     return {
                         orders: [],
                         pagination: {
@@ -302,7 +282,6 @@ export const adminAnalyticsService = {
                     };
                 }
             } else if (Array.isArray(rawData)) {
-                // If the response is directly an array, transform it
                 data = {
                     orders: rawData.map((order: AspNetOrder) => {
                         let orderItemsArray: AspNetOrderItem[] = [];
@@ -318,7 +297,6 @@ export const adminAnalyticsService = {
                             }
                         }
 
-                        // Ensure orderId is never undefined
                         const orderId = order.orderId ?? order.id ?? order.orderNumber ?? 0;
 
                         return {
@@ -361,7 +339,6 @@ export const adminAnalyticsService = {
                     }
                 };
             } else {
-                console.warn('⚠️ Unexpected API response structure:', rawData);
                 return {
                     orders: [],
                     pagination: {
@@ -375,9 +352,7 @@ export const adminAnalyticsService = {
                 };
             }
 
-            // Ensure orders is an array and already transformed
             if (!Array.isArray(data.orders)) {
-                console.warn('⚠️ Orders is not an array:', data.orders);
                 data.orders = [];
             }
 
@@ -393,7 +368,6 @@ export const adminAnalyticsService = {
                 }
             };
         } catch (error) {
-            console.error('❌ Sales orders failed with error:', error);
             return {
                 orders: [],
                 pagination: {
@@ -511,7 +485,6 @@ export const adminService = {
 
     getPromotions: async (): Promise<PromotionDto[]> => {
         try {
-            // Fix: Use /api/admin/promotions instead of /api/promotions
             const response = await fetch(`${API_BASE_URL}/api/admin/promotions`, {
                 headers: getAuthHeaders()
             });
@@ -526,15 +499,10 @@ export const adminService = {
 
     createPromotion: async (formData: FormData): Promise<PromotionDto> => {
         try {
-            console.log('=== CREATING PROMOTION ===');
-
-            // Log the FormData contents
-            console.log('FormData contents:');
             for (const [key, value] of formData.entries()) {
                 console.log(`${key}:`, value);
             }
 
-            // Convert FormData to JSON since your backend expects [FromBody]
             const promotionData = {
                 name: formData.get('name') as string,
                 description: formData.get('description') as string,
@@ -545,7 +513,6 @@ export const adminService = {
                 productIds: formData.get('productIds') ? JSON.parse(formData.get('productIds') as string) : []
             };
 
-            console.log('Converted promotion data:', promotionData);
 
             const response = await fetch(`${API_BASE_URL}/api/admin/promotions`, {
                 method: 'POST',
@@ -556,11 +523,7 @@ export const adminService = {
                 body: JSON.stringify(promotionData)
             });
 
-            console.log('Response status:', response.status);
-            console.log('Response headers:', response.headers);
-
             if (!response.ok) {
-                // Get detailed error information
                 let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
                 let errorData = null;
 
@@ -603,16 +566,10 @@ export const adminService = {
 
     updatePromotion: async (id: number, formData: FormData): Promise<PromotionDto> => {
         try {
-            console.log('=== UPDATING PROMOTION ===');
-            console.log('Promotion ID:', id);
-
-            // Log all FormData entries
-            console.log('=== FORM DATA ENTRIES ===');
             for (const [key, value] of formData.entries()) {
                 console.log(`${key}:`, value, typeof value);
             }
 
-            // Extract form data
             const name = formData.get('name') as string;
             const description = formData.get('description') as string;
             const discountPercentageStr = formData.get('discountPercentage') as string;
@@ -621,12 +578,9 @@ export const adminService = {
             const isActiveStr = formData.get('isActive') as string;
             const productIdsStr = formData.get('productIds') as string;
 
-            // Optional fields with defaults
             const bannerImageUrl = formData.get('bannerImageUrl') as string || '';
             const colorScheme = formData.get('colorScheme') as string || '';
-            const typeStr = formData.get('type') as string || '1'; // Default to FlashSale = 1
-
-            // Validate required fields
+            const typeStr = formData.get('type') as string || '1'; 
             if (!name || !name.trim()) {
                 throw new Error('Promotion name is required');
             }
@@ -645,7 +599,6 @@ export const adminService = {
                 throw new Error('Discount percentage must be between 0 and 100');
             }
 
-            // Parse dates
             const startDateTime = new Date(startDate);
             const endDateTime = new Date(endDate);
 
@@ -659,7 +612,6 @@ export const adminService = {
                 throw new Error('End date must be after start date');
             }
 
-            // Parse product IDs
             let productIds: number[] = [];
             if (productIdsStr) {
                 try {
@@ -673,10 +625,9 @@ export const adminService = {
                 }
             }
 
-            // Parse type - must be valid enum value (1-6)
-            let typeValue = parseInt(typeStr) || 1; // Default to FlashSale = 1
+            let typeValue = parseInt(typeStr) || 1; 
             if (typeValue < 1 || typeValue > 6) {
-                typeValue = 1; // Reset to FlashSale if invalid
+                typeValue = 1;
             }
 
             const promotionData = {
@@ -686,9 +637,9 @@ export const adminService = {
                 startDate: startDateTime.toISOString(),
                 endDate: endDateTime.toISOString(),
                 isActive: isActiveStr === 'true',
-                bannerImageUrl: bannerImageUrl || '',    // ADD THIS
-                type: typeValue,                         // ADD THIS
-                colorScheme: colorScheme || '',          // ADD THIS
+                bannerImageUrl: bannerImageUrl || '',    
+                type: typeValue,                         
+                colorScheme: colorScheme || '',         
                 productIds: productIds || []
             };
 
@@ -754,12 +705,8 @@ export const adminService = {
             }
 
             const result = await response.json();
-            console.log('=== PROMOTION UPDATED SUCCESSFULLY ===');
-            console.log('Updated promotion:', result);
             return result;
         } catch (error) {
-            console.error('=== ERROR UPDATING PROMOTION ===');
-            console.error('Error details:', error);
             throw error;
         }
     },
@@ -790,7 +737,6 @@ export const adminService = {
             let errorDetails: Record<string, unknown> | null = null;
 
             try {
-                // Try to get the error response body
                 const responseText = await response.text();
                 console.log('Delete error response:', responseText);
 
@@ -799,7 +745,6 @@ export const adminService = {
                         errorDetails = JSON.parse(responseText) as Record<string, unknown>;
                         console.log('Parsed delete error:', errorDetails);
 
-                        // Extract meaningful error message
                         if (typeof errorDetails.message === 'string') {
                             errorMessage = errorDetails.message;
                         } else if (typeof errorDetails.error === 'string') {
@@ -808,7 +753,6 @@ export const adminService = {
                             errorMessage = errorDetails.title;
                         }
                     } catch {
-                        // If JSON parsing fails, use the raw text
                         if (responseText.length < 200) {
                             errorMessage = responseText;
                         }
@@ -846,14 +790,10 @@ export const adminService = {
     },
 
     updateProduct: async (id: number, formData: FormData): Promise<ProductDto> => {
-        console.log(`Attempting to update product ${id}`);
 
-        // Log all FormData entries
-        console.log('=== FormData Contents ===');
         for (const [key, value] of formData.entries()) {
             console.log(`${key}:`, value);
         }
-        console.log('========================');
 
         const response = await fetch(`${API_BASE_URL}/api/admin/products/${id}`, {
             method: 'PUT',
@@ -863,15 +803,12 @@ export const adminService = {
             body: formData
         });
 
-        console.log('Response status:', response.status);
-        console.log('Response headers:', response.headers);
 
         if (!response.ok) {
             let errorData: Record<string, unknown> | null = null;
             let errorText: string = '';
 
             try {
-                // Try to get JSON error response
                 const responseText = await response.text();
                 console.log('Raw error response:', responseText);
 
@@ -888,11 +825,9 @@ export const adminService = {
                 console.error('Could not read error response:', readError);
             }
 
-            // Create detailed error message
             let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
 
             if (errorData) {
-                // Handle different error response formats
                 if (typeof errorData.message === 'string') {
                     errorMessage = errorData.message;
                 } else if (typeof errorData.error === 'string') {
@@ -900,7 +835,6 @@ export const adminService = {
                 } else if (typeof errorData.title === 'string') {
                     errorMessage = errorData.title;
                 } else if (errorData.errors && typeof errorData.errors === 'object') {
-                    // Handle validation errors
                     const validationErrors: string[] = [];
                     const errors = errorData.errors as Record<string, unknown>;
 
@@ -919,9 +853,7 @@ export const adminService = {
                 errorMessage = errorText;
             }
 
-            console.error('Update product failed:', errorMessage);
 
-            // Create enhanced error with details
             const enhancedError = new Error(errorMessage) as ExtendedError;
             enhancedError.details = errorData;
             enhancedError.status = response.status;
@@ -929,7 +861,6 @@ export const adminService = {
         }
 
         const result = await response.json();
-        console.log('Update successful:', result);
         return result;
     },
 
@@ -940,7 +871,6 @@ export const adminService = {
         return handleApiResponse(response);
     },
 
-    // Coupon management methods
     getCoupons: async (): Promise<CouponDto[]> => {
         const response = await fetch(`${API_BASE_URL}/api/admin/coupons`, {
             headers: getAuthHeaders()
@@ -966,8 +896,6 @@ export const adminService = {
         usageLimit?: number;
         isActive: boolean;
     }): Promise<CouponDto> => {
-        console.log('=== CREATING COUPON ===');
-        console.log('Coupon data:', couponData);
 
         const response = await fetch(`${API_BASE_URL}/api/admin/coupons`, {
             method: 'POST',
@@ -1028,9 +956,6 @@ export const adminService = {
         usageLimit?: number;
         isActive: boolean;
     }): Promise<CouponDto> => {
-        console.log('=== UPDATING COUPON ===');
-        console.log('Coupon ID:', id);
-        console.log('Coupon data:', couponData);
 
         const response = await fetch(`${API_BASE_URL}/api/admin/coupons/${id}`, {
             method: 'PUT',
@@ -1041,7 +966,6 @@ export const adminService = {
             body: JSON.stringify(couponData)
         });
 
-        console.log('Response status:', response.status);
 
         if (!response.ok) {
             let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
@@ -1076,19 +1000,16 @@ export const adminService = {
         }
 
         const result = await response.json() as CouponDto;
-        console.log('Coupon updated successfully:', result);
         return result;
     },
 
     deleteCoupon: async (id: number): Promise<void> => {
-        console.log(`Attempting to delete coupon ${id}`);
 
         const response = await fetch(`${API_BASE_URL}/api/admin/coupons/${id}`, {
             method: 'DELETE',
             headers: getAuthHeaders()
         });
 
-        console.log('Delete response status:', response.status);
 
         if (!response.ok) {
             let errorMessage = `HTTP ${response.status}: ${response.statusText}`;

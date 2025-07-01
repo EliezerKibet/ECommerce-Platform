@@ -1,4 +1,3 @@
-// components/ui/button.tsx - Enhanced button component with better styling
 import React from 'react'
 
 export interface ButtonProps {

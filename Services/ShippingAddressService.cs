@@ -19,7 +19,6 @@ namespace ECommerce.API.Services
 
         public async Task<List<ShippingAddressDto>> GetUserAddressesAsync(string userId)
         {
-            // Add a safety check
             if (string.IsNullOrEmpty(userId))
             {
                 _logger.LogWarning("GetUserAddressesAsync called with null or empty userId");
@@ -46,7 +45,6 @@ namespace ECommerce.API.Services
 
         public async Task<ShippingAddressDto> SaveAddressAsync(string userId, ShippingAddressDto addressDto)
         {
-            // Check if this is a duplicate address
             var existingAddress = await _context.ShippingAddresses
                 .Where(a => a.UserId == userId &&
                        a.FullName.ToLower() == addressDto.FullName.ToLower() &&
@@ -58,7 +56,6 @@ namespace ECommerce.API.Services
 
             if (existingAddress != null)
             {
-                // Update existing address usage
                 existingAddress.LastUsed = DateTime.UtcNow;
                 existingAddress.UseCount++;
 
@@ -74,7 +71,6 @@ namespace ECommerce.API.Services
                 return MapToDto(existingAddress);
             }
 
-            // Create new address
             var address = new ShippingAddress
             {
                 UserId = userId,
@@ -91,7 +87,6 @@ namespace ECommerce.API.Services
                 LastUsed = DateTime.UtcNow
             };
 
-            // If this is the first address or set as default
             if (addressDto.IsDefault || !await _context.ShippingAddresses.AnyAsync(a => a.UserId == userId))
             {
                 await ClearDefaultAddressesAsync(userId);
@@ -133,7 +128,6 @@ namespace ECommerce.API.Services
 
             _context.ShippingAddresses.Remove(address);
 
-            // If it was the default address, set a new default
             if (address.IsDefault)
             {
                 var newDefaultAddress = await _context.ShippingAddresses
@@ -198,7 +192,6 @@ namespace ECommerce.API.Services
 
         public async Task<ShippingAddressDto> SaveGuestAddressAsync(string guestId, ShippingAddressDto addressDto)
         {
-            // Check if this is a duplicate address for this guest
             var existingAddress = await _context.ShippingAddresses
                 .Where(a => a.UserId == guestId &&
                        a.FullName.ToLower() == addressDto.FullName.ToLower() &&
@@ -210,7 +203,6 @@ namespace ECommerce.API.Services
 
             if (existingAddress != null)
             {
-                // Update existing address usage
                 existingAddress.LastUsed = DateTime.UtcNow;
                 existingAddress.UseCount++;
 
@@ -226,7 +218,6 @@ namespace ECommerce.API.Services
                 return MapToDto(existingAddress);
             }
 
-            // Create new address for guest
             var address = new ShippingAddress
             {
                 UserId = guestId,
@@ -244,7 +235,6 @@ namespace ECommerce.API.Services
                 UseCount = 1
             };
 
-            // If this is the first address or set as default
             if (addressDto.IsDefault || !await _context.ShippingAddresses.AnyAsync(a => a.UserId == guestId))
             {
                 await ClearDefaultAddressesAsync(guestId);
@@ -265,13 +255,10 @@ namespace ECommerce.API.Services
 
             if (guestAddresses.Any())
             {
-                // Check if user already has any addresses
                 bool userHasAddresses = await _context.ShippingAddresses.AnyAsync(a => a.UserId == userId);
 
                 foreach (var address in guestAddresses)
                 {
-                    // If this is a default address but user already has addresses,
-                    // we'll respect the user's existing default
                     if (address.IsDefault && userHasAddresses)
                     {
                         address.IsDefault = false;
@@ -295,7 +282,6 @@ namespace ECommerce.API.Services
             if (existingAddress == null)
                 throw new KeyNotFoundException("Address not found");
 
-            // Update the properties (only fields that exist in your model)
             existingAddress.FullName = addressDto.FullName;
             existingAddress.AddressLine1 = addressDto.AddressLine1;
             existingAddress.AddressLine2 = addressDto.AddressLine2;
@@ -309,7 +295,6 @@ namespace ECommerce.API.Services
 
             await _context.SaveChangesAsync();
 
-            // Manual mapping (only existing fields)
             return new ShippingAddressDto
             {
                 Id = existingAddress.Id,
@@ -324,7 +309,7 @@ namespace ECommerce.API.Services
                 PhoneNumber = existingAddress.PhoneNumber,
                 IsDefault = existingAddress.IsDefault,
                 UseCount = existingAddress.UseCount,
-                Email = null // Assuming email is not part of the address model
+                Email = null 
             };
         }
 

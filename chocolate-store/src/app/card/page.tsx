@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { getCart, updateCartItem, removeFromCart } from '@/lib/services';
-import { Cart } from '@/types'; // Removed CartItem as it's unused
+import { Cart } from '@/types'; 
 import { toast } from 'react-hot-toast';
 
 export default function CartPage() {
@@ -37,7 +37,6 @@ export default function CartPage() {
         setProcessingItemId(itemId);
         try {
             await updateCartItem(itemId, newQuantity);
-            // Update the cart locally
             if (cart) {
                 const updatedItems = cart.items.map(item =>
                     item.id === itemId ? { ...item, quantity: newQuantity, subtotal: item.productPrice * newQuantity } : item
@@ -48,7 +47,6 @@ export default function CartPage() {
             }
             toast.success('Cart updated');
         } catch (error) {
-            console.error('Error updating cart:', error);
             toast.error('Failed to update cart');
         } finally {
             setProcessingItemId(null);
@@ -59,7 +57,6 @@ export default function CartPage() {
         setProcessingItemId(itemId);
         try {
             await removeFromCart(itemId);
-            // Update cart locally
             if (cart) {
                 const itemToRemove = cart.items.find(item => item.id === itemId);
                 const updatedItems = cart.items.filter(item => item.id !== itemId);
